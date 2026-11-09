@@ -43,13 +43,14 @@ jobs:
       - name: Checkout
         shell: bash
         env:
-          CHECKOUT_REF: ${{ inputs.ref }}
+          CHECKOUT_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'cursor/zh-i18n-c873' }}
           GIT_TERMINAL_PROMPT: "0"
         run: |
           set -euo pipefail
+          ref="${CHECKOUT_REF:-cursor/zh-i18n-c873}"
           git init .
           git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
-          git fetch --no-tags --depth=1 origin "$CHECKOUT_REF"
+          git fetch --no-tags --depth=1 origin "$ref"
           git sparse-checkout set --no-cone '/*' '!/.repos/'
           git -c checkout.workers=0 checkout --detach FETCH_HEAD
 
@@ -61,24 +62,35 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ inputs.arch == 'arm64' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}
+          targets: ${{ (github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64') == 'arm64' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}
 
       - name: Build unsigned DMG
         shell: bash
         env:
           T3CODE_DESKTOP_PLATFORM: mac
           T3CODE_DESKTOP_TARGET: dmg
-          T3CODE_DESKTOP_ARCH: ${{ inputs.arch }}
-          T3CODE_DESKTOP_VERSION: ${{ inputs.version }}
+          T3CODE_DESKTOP_ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
+          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh' }}
           T3CODE_DESKTOP_SIGNED: "false"
-        run: node scripts/build-desktop-artifact.ts
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if node scripts/build-desktop-artifact.ts; then
+              exit 0
+            fi
+            echo "desktop build attempt ${attempt} failed"
+            if [[ "$attempt" == "3" ]]; then
+              exit 1
+            fi
+            sleep 20
+          done
 
       - name: Upload to release
         shell: bash
         env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
-          ARCH: ${{ inputs.arch }}
-          VERSION: ${{ inputs.version }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.7.zh' }}
+          ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh' }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail

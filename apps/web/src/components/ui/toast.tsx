@@ -26,6 +26,7 @@ import {
 } from "./toast.logic";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./tooltip";
 import { useThreadRouteTarget } from "~/hooks/useThreadRouteTarget";
+import { translateUi } from "~/uiLocale";
 
 export type ThreadToastData = {
   threadRef?: ScopedThreadRef | null;
@@ -84,6 +85,18 @@ function createBufferedToastManager(): BaseToastManager {
   });
   return {
     ...manager,
+    add(options) {
+      const title = typeof options.title === "string" ? translateUi(options.title) : options.title;
+      const description =
+        typeof options.description === "string"
+          ? translateUi(options.description)
+          : options.description;
+      return manager.add(
+        title === options.title && description === options.description
+          ? options
+          : { ...options, title, description },
+      );
+    },
     " subscribe"(listener) {
       listeners.add(listener);
       for (const event of pending.splice(0)) listener(event);

@@ -23,6 +23,8 @@ describe("translate", () => {
   it("returns Simplified Chinese for known interface copy", () => {
     expect(translate("zh-CN", "New thread")).toBe("新建会话");
     expect(translate("zh-CN", "Interface language")).toBe("界面语言");
+    expect(translate("zh-CN", "Could not check for updates")).toBe("无法检查更新");
+    expect(translate("zh-CN", "Rename thread")).toBe("重命名会话");
   });
 
   it("keeps English copy and unknown strings", () => {

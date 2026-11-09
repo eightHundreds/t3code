@@ -1,4 +1,10 @@
-import { zhCNMessages } from "./i18nMessages.ts";
+import { zhCNExtraMessages } from "./i18nMessagesExtra.ts";
+import { zhCNMessages as zhCNCoreMessages } from "./i18nMessages.ts";
+
+const zhCNMessages: Readonly<Record<string, string>> = {
+  ...zhCNCoreMessages,
+  ...zhCNExtraMessages,
+};
 
 export const UI_LOCALE_SETTINGS = ["system", "en", "zh-CN"] as const;
 export type UiLocaleSetting = (typeof UI_LOCALE_SETTINGS)[number];
