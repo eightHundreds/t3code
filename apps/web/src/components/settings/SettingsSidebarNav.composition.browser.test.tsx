@@ -1,6 +1,7 @@
 import { expect, it, vi } from "vite-plus/test";
 import { page, userEvent } from "vite-plus/test/browser";
 
+import { __setClientSettingsForTests, getClientSettings } from "../../hooks/useSettings";
 import { act, render } from "../../../test/render";
 import { SidebarProvider } from "../ui/sidebar";
 import { SettingsSidebarNav } from "./SettingsSidebarNav";
@@ -10,6 +11,20 @@ vi.mock("./useAvailableSettingsSearchItems", () => ({
     { id: "theme", title: "Theme", to: "/settings/appearance" },
   ],
 }));
+
+it("shows Simplified Chinese for the settings navigation", async () => {
+  __setClientSettingsForTests({ ...getClientSettings(), uiLocale: "zh-CN" });
+  await using _screen = await render(
+    <SidebarProvider defaultOpen>
+      <SettingsSidebarNav pathname="/settings/general" />
+    </SidebarProvider>,
+    { router: "/settings/general" },
+  );
+
+  await expect.element(page.getByRole("combobox", { name: "搜索设置" })).toBeVisible();
+  await expect.element(page.getByRole("treeitem", { name: "通用" })).toBeVisible();
+  await expect.element(page.getByRole("treeitem", { name: "外观" })).toBeVisible();
+});
 
 it("ignores composing keys in the search", async () => {
   await using screen = await render(

@@ -8,6 +8,7 @@ import {
   sourceControlClients,
   type SourceControlDefinition,
 } from "@t3tools/client-runtime/source-control-clients";
+import { translate, type AppLocale } from "@t3tools/shared/i18n";
 import { DEFAULT_KEYBINDINGS } from "@t3tools/shared/keybindings";
 import * as Schema from "effect/Schema";
 import { TYPOGRAPHY_ADVANCED_STORAGE_KEY } from "../../appearanceFonts";
@@ -222,6 +223,12 @@ const SOURCE_CONTROL_HOST_TERMS = sourceControlClients.definitions
   .join(" ");
 
 export const SETTINGS_SEARCH_ITEMS = [
+  {
+    id: "interface-language",
+    title: "Interface language",
+    to: "/settings/general",
+    searchTerms: ["locale language ui 语言 中文 english chinese 简体中文 follow system"],
+  },
   {
     id: "storage-worktree-keep-when",
     targetId: "storage-worktrees",
@@ -1488,6 +1495,7 @@ export function settingsForThisPlatform(
 export function searchSettings(
   query: string,
   items: ReadonlyArray<SettingsSearchItem> = SETTINGS_SEARCH_ITEMS,
+  locale: AppLocale = "en",
 ): ReadonlyArray<SettingsSearchItem> {
   const normalizedQuery = normalizeSearchText(query);
   if (normalizedQuery.length === 0) return [];
@@ -1495,9 +1503,11 @@ export function searchSettings(
 
   return settingsForThisPlatform(items)
     .flatMap((item, index) => {
-      const title = normalizeSearchText(item.title);
+      const title = normalizeSearchText(translate(locale, item.title));
       const fields = [
         title,
+        normalizeSearchText(item.title),
+        normalizeSearchText(translate(locale, SETTINGS_SECTION_LABELS[item.to])),
         normalizeSearchText(SETTINGS_SECTION_LABELS[item.to]),
         ...(item.searchTerms ?? []).map(normalizeSearchText),
       ];

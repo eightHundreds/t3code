@@ -17,6 +17,7 @@ import {
   PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE,
   usePrimarySettingsAvailable,
 } from "../../hooks/useSettings";
+import { useTranslate } from "../../i18n";
 import { cn } from "../../lib/utils";
 import { WorkspacePageContainer, type WorkspacePageWidth } from "../WorkspacePageContainer";
 import { Button } from "../ui/button";
@@ -223,6 +224,7 @@ export function SettingsSection({
   variant?: "grouped" | "plain";
   children: ReactNode;
 }) {
+  const t = useTranslate();
   const targetRef = useSettingsSearchTarget<HTMLElement>(sectionProps.id);
 
   return (
@@ -233,7 +235,7 @@ export function SettingsSection({
       className={cn(!hideTitle && "space-y-2.5", className)}
     >
       {hideTitle ? (
-        <h2 className="sr-only">{title}</h2>
+        <h2 className="sr-only">{t(title)}</h2>
       ) : (
         <div
           data-settings-scroll-target
@@ -242,7 +244,7 @@ export function SettingsSection({
           <div className="flex min-w-0 items-center gap-1">
             <h2 className="flex min-h-7 items-center gap-2 text-base font-semibold text-foreground">
               {icon}
-              {title}
+              {t(title)}
             </h2>
             {titleAction}
           </div>
@@ -333,6 +335,7 @@ export function SettingsRow({
   managed?: string | undefined;
   children?: ReactNode;
 }) {
+  const t = useTranslate();
   const targetRef = useSettingsSearchTarget<HTMLDivElement>(rowProps.id);
   const primarySettingsAvailable = usePrimarySettingsAvailable();
   const context = useOptionalSettingsScope();
@@ -383,6 +386,8 @@ export function SettingsRow({
           (environment) => environment.environmentId === context.scope.environmentIds[0],
         )?.label ?? "environment")
       : "environment";
+  const displayTitle = typeof title === "string" ? t(title) : title;
+  const displayDescription = typeof description === "string" ? t(description) : description;
   const environmentSettingsById = new Map(
     (context?.connectedEnvironments ?? []).flatMap((environment) =>
       environment.serverConfig
@@ -428,24 +433,28 @@ export function SettingsRow({
     managed !== undefined && control
       ? inertControl(managed)
       : managedBy !== undefined && control
-        ? inertControl(`Managed by ${managedBy}.`)
+        ? inertControl(t("Managed by {name}.", { name: managedBy }))
         : unavailable && control
           ? inertControl(
               !canWriteSettings
-                ? `This connection lacks permission to change settings on ${
-                    context
-                      ? context.connectedEnvironments
-                          .filter((target) => !writableIds.has(target.environmentId))
-                          .map((target) => target.label)
-                          .join(", ") || "the selected environment"
-                      : (primaryEnvironment?.label ?? "the primary environment")
-                  }.`
+                ? t("This connection lacks permission to change settings on {name}.", {
+                    name:
+                      (context
+                        ? context.connectedEnvironments
+                            .filter((target) => !writableIds.has(target.environmentId))
+                            .map((target) => target.label)
+                            .join(", ")
+                        : "") ||
+                      (context
+                        ? t("the selected environment")
+                        : (primaryEnvironment?.label ?? t("the primary environment"))),
+                  })
                 : context
-                  ? "Reconnect the selected environment to change this setting."
-                  : PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE,
+                  ? t("Reconnect the selected environment to change this setting.")
+                  : t(PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE),
             )
           : environmentWide && control
-            ? inertControl("Environment-wide setting. Select an environment to change it.")
+            ? inertControl(t("Environment-wide setting. Select an environment to change it."))
             : control;
   const customized =
     context !== null &&
@@ -459,16 +468,16 @@ export function SettingsRow({
       }),
     );
   const inheritance: { state: SettingInheritanceState; summary: string } = mixed
-    ? { state: "mixed", summary: "Mixed across selected environments" }
+    ? { state: "mixed", summary: t("Mixed across selected environments") }
     : source === "project"
-      ? { state: "overridden", summary: "Overridden for this project" }
+      ? { state: "overridden", summary: t("Overridden for this project") }
       : source === "t3.json"
-        ? { state: "inherited", summary: "Inherited from the repository's t3.json" }
+        ? { state: "inherited", summary: t("Inherited from the repository's t3.json") }
         : source === "environment" && scopedKeys.length > 0
-          ? { state: "inherited", summary: `Inherited from ${inheritedFrom}` }
+          ? { state: "inherited", summary: t("Inherited from {name}", { name: inheritedFrom }) }
           : customized
-            ? { state: "environment", summary: "Set on the environment" }
-            : { state: "default", summary: "Built-in default" };
+            ? { state: "environment", summary: t("Set on the environment") }
+            : { state: "default", summary: t("Built-in default") };
   const renderedInheritance =
     context && serverScoped && settingKeys.length > 0 ? (
       <SettingInheritance
@@ -503,7 +512,7 @@ export function SettingsRow({
       <div className="flex flex-col gap-3 @min-[32rem]/settings-row:grid @min-[32rem]/settings-row:grid-cols-[minmax(0,1fr)_auto] @min-[32rem]/settings-row:items-center @min-[32rem]/settings-row:gap-8">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex min-h-5 items-center gap-1.5">
-            <h3 className="text-sm font-medium text-foreground">{title}</h3>
+            <h3 className="text-sm font-medium text-foreground">{displayTitle}</h3>
             {renderedInheritance ? (
               <span
                 className={cn(
@@ -523,7 +532,7 @@ export function SettingsRow({
           </div>
           {description ? (
             <p className="max-w-2xl text-pretty text-xs leading-normal text-muted-foreground">
-              {description}
+              {displayDescription}
             </p>
           ) : null}
           {renderedStatus ? (
@@ -558,6 +567,7 @@ export function SettingResetButton({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslate();
   return (
     <Tooltip>
       <TooltipTrigger
@@ -565,7 +575,7 @@ export function SettingResetButton({
           <Button
             size="icon-micro"
             variant="ghost-muted"
-            aria-label={`Reset ${label} to default`}
+            aria-label={t("Reset {label} to default", { label: t(label) })}
             disabled={disabled}
             onClick={(event) => {
               event.stopPropagation();
@@ -576,7 +586,7 @@ export function SettingResetButton({
           </Button>
         }
       />
-      <TooltipPopup side="top">{tooltip}</TooltipPopup>
+      <TooltipPopup side="top">{t(tooltip)}</TooltipPopup>
     </Tooltip>
   );
 }

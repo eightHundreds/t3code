@@ -1,6 +1,8 @@
 import { beforeEach } from "vite-plus/test";
 import { commands } from "vite-plus/test/browser";
 
+import { __setClientSettingsForTests, getClientSettings } from "../src/hooks/useSettings";
+
 declare module "vite-plus/test/browser" {
   interface BrowserCommands {
     /** Defined in vite.config.ts. Moves Playwright's mouse off the page. */
@@ -14,4 +16,8 @@ declare module "vite-plus/test/browser" {
 // running and can move the mouse after its own afterEach.
 beforeEach(async () => {
   await commands.resetPointer();
+  const current = getClientSettings();
+  if (current.uiLocale !== "en") {
+    __setClientSettingsForTests({ ...current, uiLocale: "en" });
+  }
 });
