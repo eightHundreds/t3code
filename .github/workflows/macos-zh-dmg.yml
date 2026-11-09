@@ -1,0 +1,105 @@
+name: macOS 中文版安装包
+
+# 公开仓库的 GitHub macOS 托管 runner 上打未签名的 DMG，并挂到已有 Release。
+# 没有 Apple 签名证书，下载后需要在本机放行 Gatekeeper。
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 要打包的 git 引用
+        required: false
+        default: cursor/zh-i18n-c873
+      arch:
+        description: arm64 或 x64
+        required: false
+        default: arm64
+        type: choice
+        options:
+          - arm64
+          - x64
+      version:
+        description: 界面版本号。electron-builder 会把末尾的 .zh 收成 semver 预发布号
+        required: false
+        default: 0.1.7.zh
+      release_tag:
+        description: 上传到的 GitHub Release 标签
+        required: false
+        default: v0.1.7.zh
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    name: 构建未签名 DMG
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      # checkout 的 submodule 清理会踩到 .repos 里的悬空 gitlink。
+      - name: Checkout
+        shell: bash
+        env:
+          CHECKOUT_REF: ${{ inputs.ref }}
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          git fetch --no-tags --depth=1 origin "$CHECKOUT_REF"
+          git sparse-checkout set --no-cone '/*' '!/.repos/'
+          git -c checkout.workers=0 checkout --detach FETCH_HEAD
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-ci-deps
+        with:
+          install-args: --filter=@t3tools/desktop... --filter=t3... --filter=@t3tools/scripts...
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ inputs.arch == 'arm64' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}
+
+      - name: Build unsigned DMG
+        shell: bash
+        env:
+          T3CODE_DESKTOP_PLATFORM: mac
+          T3CODE_DESKTOP_TARGET: dmg
+          T3CODE_DESKTOP_ARCH: ${{ inputs.arch }}
+          T3CODE_DESKTOP_VERSION: ${{ inputs.version }}
+          T3CODE_DESKTOP_SIGNED: "false"
+        run: node scripts/build-desktop-artifact.ts
+
+      - name: Upload to release
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          ARCH: ${{ inputs.arch }}
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(release/T3-Code-*.dmg release/T3-Code-*.zip)
+          if (( ${#files[@]} == 0 )); then
+            echo "release/ 里没有 dmg 或 zip" >&2
+            ls -la release || true
+            exit 1
+          fi
+          gh release upload "$RELEASE_TAG" "${files[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          {
+            echo "中文界面版本 ${VERSION} 的 macOS ${ARCH} 安装包（未签名）。"
+            echo
+            echo "下载 DMG 后，如果系统提示已损坏或无法打开："
+            echo
+            echo '1. 打开 DMG，把 T3 Code 拖到“应用程序”。'
+            echo "2. 在终端执行："
+            echo
+            echo '```sh'
+            echo 'xattr -cr "/Applications/T3 Code.app"'
+            echo '```'
+            echo
+            echo "3. 再打开应用。也可以在访达里按住 Control 点应用图标，选“打开”。"
+            echo
+            echo "这个包没有 Apple 公证。界面版本号是 ${VERSION}。"
+          } > "$RUNNER_TEMP/release-notes.md"
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/release-notes.md"
