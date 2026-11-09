@@ -2747,6 +2747,19 @@ export function resolveMockUpdateServerUrl(mockUpdateServerPort: number | undefi
 }
 
 // electron-builder reads user-agent syntax (pnpm/version), not packageManager syntax (pnpm@version).
+// electron-builder rejects versions that are not semver. `0.1.7.zh` stays the
+// label in the app and the installer filename; the package version is a prerelease.
+export function electronBuilderPackageVersion(version: string): string {
+  return version.endsWith(".zh") ? `${version.slice(0, -3)}-zh` : version;
+}
+
+export function desktopArtifactName(version: string): string {
+  if (version.endsWith(".zh")) {
+    return `T3-Code-${version}-\${arch}.\${ext}`;
+  }
+  return "T3-Code-${version}-${arch}.${ext}";
+}
+
 export function resolvePackageManagerUserAgent(packageManager: string): string {
   const trimmed = packageManager.trim();
   const versionSeparator = trimmed.lastIndexOf("@");
@@ -2783,7 +2796,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     afterPack: (yield* Path.Path).join(yield* RepoRoot, "scripts/prepare-server-compile-cache.cjs"),
     appId: DESKTOP_APP_ID,
     productName: resolveDesktopProductName(version),
-    artifactName: "T3-Code-${version}-${arch}.${ext}",
+    artifactName: desktopArtifactName(version),
     electronLanguages: [...DESKTOP_ELECTRON_LANGUAGES],
     files: [
       ...DESKTOP_FILE_EXCLUSIONS,
@@ -3870,8 +3883,8 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
       : undefined;
   const stagePackageJson: StagePackageJson = {
     name: "t3code",
-    version: appVersion,
-    buildVersion: appVersion,
+    version: electronBuilderPackageVersion(appVersion),
+    buildVersion: electronBuilderPackageVersion(appVersion),
     t3codeCommitHash: commitHash,
     // Read by apps/desktop/src/preview/Passkeys.ts; must match the signed entitlements.
     ...(macWebAuthn ? { t3codeWebAuthn: macWebAuthn } : {}),
