@@ -2,7 +2,7 @@ name: macOS 中文版安装包
 
 # 公开仓库的 GitHub macOS 托管 runner 上打未签名的 DMG，并挂到已有 Release。
 # 没有 Apple 签名证书，下载后需要在本机放行 Gatekeeper。
-# 菜单文案更新后重新打包，安装包才会带上这些翻译。
+# 版本号变更后重新打包，安装包才会带上这一版。
 on:
   push:
     branches: [main]
@@ -23,13 +23,13 @@ on:
           - arm64
           - x64
       version:
-        description: 界面版本号。electron-builder 会把末尾的 .zh 收成 semver 预发布号
+        description: 界面版本号。electron-builder 会把 .zh 和 .zh.1 收成 semver 预发布号
         required: false
-        default: 0.1.7.zh
+        default: 0.1.7.zh.1
       release_tag:
         description: 上传到的 GitHub Release 标签
         required: false
-        default: v0.1.7.zh
+        default: v0.1.7.zh.1
 
 permissions:
   contents: write
@@ -71,7 +71,7 @@ jobs:
           T3CODE_DESKTOP_PLATFORM: mac
           T3CODE_DESKTOP_TARGET: dmg
           T3CODE_DESKTOP_ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
-          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh' }}
+          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh.1' }}
           T3CODE_DESKTOP_SIGNED: "false"
         run: |
           set -euo pipefail
@@ -89,9 +89,9 @@ jobs:
       - name: Upload to release
         shell: bash
         env:
-          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.7.zh' }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.7.zh.1' }}
           ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
-          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh' }}
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh.1' }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -102,9 +102,11 @@ jobs:
             ls -la release || true
             exit 1
           fi
-          gh release upload "$RELEASE_TAG" "${files[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          sha="$(git rev-parse HEAD)"
           {
             echo "中文界面版本 ${VERSION} 的 macOS ${ARCH} 安装包（未签名）。"
+            echo
+            echo "这一版包含长会话上下文：占用、输入、输出、缓存读取、缓存写入，以及交接到新会话。"
             echo
             echo "下载 DMG 后，如果系统提示已损坏或无法打开："
             echo
@@ -119,4 +121,12 @@ jobs:
             echo
             echo "这个包没有 Apple 公证。界面版本号是 ${VERSION}。"
           } > "$RUNNER_TEMP/release-notes.md"
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$sha" \
+              --title "T3 Code ${VERSION}" \
+              --notes-file "$RUNNER_TEMP/release-notes.md"
+          fi
+          gh release upload "$RELEASE_TAG" "${files[@]}" --repo "$GITHUB_REPOSITORY" --clobber
           gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/release-notes.md"
