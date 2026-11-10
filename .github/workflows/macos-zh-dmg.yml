@@ -2,6 +2,7 @@ name: macOS 中文版安装包
 
 # 公开仓库的 GitHub macOS 托管 runner 上打未签名的 DMG，并挂到已有 Release。
 # 没有 Apple 签名证书，下载后需要在本机放行 Gatekeeper。
+# 菜单文案更新后重新打包，安装包才会带上这些翻译。
 on:
   push:
     branches: [main]
