@@ -57,9 +57,10 @@ export function createLocalApi(): LocalApi {
       ): Promise<T | null> => {
         const localizedItems = localizeMenuItems(items);
         if (window.desktopBridge) {
-          return window.desktopBridge.showContextMenu(localizedItems, position) as Promise<
-            T | null
-          >;
+          return window.desktopBridge.showContextMenu(
+            localizedItems,
+            position,
+          ) as Promise<T | null>;
         }
         return showContextMenuFallback(localizedItems, position);
       },

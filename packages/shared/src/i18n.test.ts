@@ -25,6 +25,9 @@ describe("translate", () => {
     expect(translate("zh-CN", "Interface language")).toBe("界面语言");
     expect(translate("zh-CN", "Could not check for updates")).toBe("无法检查更新");
     expect(translate("zh-CN", "Rename thread")).toBe("重命名会话");
+    expect(translate("zh-CN", "Side chat")).toBe("侧边会话");
+    expect(translate("zh-CN", "Linked pull requests")).toBe("已关联的拉取请求");
+    expect(translate("zh-CN", "Close {title}", { title: "Diff" })).toBe("关闭 Diff");
   });
 
   it("keeps English copy and unknown strings", () => {

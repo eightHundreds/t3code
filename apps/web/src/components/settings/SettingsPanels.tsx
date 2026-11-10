@@ -1057,7 +1057,11 @@ export function GeneralSettingsPanel() {
                 }
               }}
             >
-              <SelectTrigger size="sm" className="w-full sm:w-40" aria-label={t("Timestamp format")}>
+              <SelectTrigger
+                size="sm"
+                className="w-full sm:w-40"
+                aria-label={t("Timestamp format")}
+              >
                 <SelectValue>{t(TIMESTAMP_FORMAT_LABELS[settings.timestampFormat])}</SelectValue>
               </SelectTrigger>
               <SelectPopup align="end" alignItemWithTrigger={false}>

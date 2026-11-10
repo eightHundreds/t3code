@@ -1062,7 +1062,7 @@ function OpenCommandPaletteDialog(props: {
 
     for (const source of orderedSources) {
       const label = addProjectRemoteSourceLabel(source);
-      const title = source === "url" ? "Git URL" : `${label} repository`;
+      const title = source === "url" ? t("Git URL") : `${label} repository`;
       const description =
         source === "url"
           ? "Clone from a remote URL"
@@ -1400,7 +1400,9 @@ function OpenCommandPaletteDialog(props: {
           ? ["copy", "pull request", "link", "reference"]
           : ["copy", "thread", "thread id", "reference"],
       title:
-        activeThreadReferenceCopyTarget.kind === "pull-request" ? t("Copy PR link") : t("Copy thread"),
+        activeThreadReferenceCopyTarget.kind === "pull-request"
+          ? t("Copy PR link")
+          : t("Copy thread"),
       description: activeThreadReferenceCopyTarget.description,
       icon: <LinkIcon className={ITEM_ICON_CLASS} />,
       shortcutCommand: "thread.copyReference",
@@ -2101,7 +2103,9 @@ function OpenCommandPaletteDialog(props: {
         stackedThreadToast({
           type: "error",
           title: t("Clone unavailable"),
-          description: t("This connection needs permission to write source control and add projects."),
+          description: t(
+            "This connection needs permission to write source control and add projects.",
+          ),
         }),
       );
       return;
@@ -2941,7 +2945,9 @@ function OpenCommandPaletteDialog(props: {
               ? { emptyStateMessage: t("Relative paths require an active project.") }
               : willCreateProjectPath
                 ? {
-                    emptyStateMessage: t("Press Enter to create this folder and add it as a project."),
+                    emptyStateMessage: t(
+                      "Press Enter to create this folder and add it as a project.",
+                    ),
                   }
                 : isThreadSearchPending
                   ? { emptyStateMessage: t("Searching thread messages…") }

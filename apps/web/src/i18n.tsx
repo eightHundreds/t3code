@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 import { resolveAppLocale, translate, type TranslateValues } from "@t3tools/shared/i18n";
 import { useClientSettings } from "./hooks/useSettings";
@@ -16,10 +16,7 @@ export function useAppLocale() {
 
 export function useTranslate() {
   const locale = useAppLocale();
-  return useMemo(
-    () => (source: string, values?: TranslateValues) => translate(locale, source, values),
-    [locale],
-  );
+  return (source: string, values?: TranslateValues) => translate(locale, source, values);
 }
 
 export function LocaleDocument() {

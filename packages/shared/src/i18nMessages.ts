@@ -107,7 +107,8 @@ export const zhCNMessages: Readonly<Record<string, string>> = {
     "此连接无权修改 {name} 上的设置。",
   "the selected environment": "所选环境",
   "the primary environment": "主环境",
-  "Reconnect the selected environment to change this setting.": "重新连接所选环境后才能修改这项设置。",
+  "Reconnect the selected environment to change this setting.":
+    "重新连接所选环境后才能修改这项设置。",
   "Environment-wide setting. Select an environment to change it.":
     "这是整个环境的设置。请选择一个环境后再修改。",
   "This setting is saved on a server, and the hosted app is not anchored to one. Change it from the desktop app or from the server's own address.":

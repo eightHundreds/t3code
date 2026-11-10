@@ -2,6 +2,7 @@ import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { CheckIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
 import type * as React from "react";
 
+import { useLocalizedText } from "~/uiLocale";
 import { cn } from "~/lib/utils";
 import { buttonVariants } from "./button";
 import { renderClosingPositioner } from "./closing-positioner";
@@ -120,12 +121,14 @@ function MenuItem({
   inset,
   density = "default",
   variant = "default",
+  children,
   ...props
 }: MenuPrimitive.Item.Props & {
   inset?: boolean;
   density?: "default" | "touch";
   variant?: "default" | "destructive" | "ghost";
 }) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <MenuPrimitive.Item
       className={cn(
@@ -144,11 +147,14 @@ function MenuItem({
       data-slot="menu-item"
       data-variant={variant}
       {...props}
-    />
+    >
+      {localizedChildren}
+    </MenuPrimitive.Item>
   );
 }
 
-function MenuItemLabel({ className, ...props }: React.ComponentProps<"span">) {
+function MenuItemLabel({ className, children, ...props }: React.ComponentProps<"span">) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <span
       data-slot="menu-item-label"
@@ -157,7 +163,9 @@ function MenuItemLabel({ className, ...props }: React.ComponentProps<"span">) {
         className,
       )}
       {...props}
-    />
+    >
+      {localizedChildren}
+    </span>
   );
 }
 
@@ -170,6 +178,7 @@ function MenuCheckboxItem({
 }: MenuPrimitive.CheckboxItem.Props & {
   variant?: "default" | "icon" | "switch";
 }) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <MenuPrimitive.CheckboxItem
       checked={checked}
@@ -186,7 +195,7 @@ function MenuCheckboxItem({
     >
       {variant === "switch" ? (
         <>
-          <span className="col-start-1">{children}</span>
+          <span className="col-start-1">{localizedChildren}</span>
           <MenuPrimitive.CheckboxItemIndicator
             className="inset-shadow-[0_1px_--theme(--color-black/4%)] inline-flex h-[calc(var(--thumb-size)+2px)] w-[calc(var(--thumb-size)*2-2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]"
             keepMounted
@@ -214,7 +223,7 @@ function MenuCheckboxItem({
               <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
             </svg>
           </MenuPrimitive.CheckboxItemIndicator>
-          <span className="col-start-2">{children}</span>
+          <span className="col-start-2">{localizedChildren}</span>
         </>
       )}
     </MenuPrimitive.CheckboxItem>
@@ -233,6 +242,7 @@ function MenuRadioItem({
 }: MenuPrimitive.RadioItem.Props & {
   hideIndicator?: boolean;
 }) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <MenuPrimitive.RadioItem
       className={cn(
@@ -242,7 +252,7 @@ function MenuRadioItem({
       data-slot="menu-radio-item"
       {...props}
     >
-      <span className="min-w-0 flex-1">{children}</span>
+      <span className="min-w-0 flex-1">{localizedChildren}</span>
     </MenuPrimitive.RadioItem>
   );
 }
@@ -267,10 +277,12 @@ function MenuRadioItemIndicator({
 function MenuGroupLabel({
   className,
   inset,
+  children,
   ...props
 }: MenuPrimitive.GroupLabel.Props & {
   inset?: boolean;
 }) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <MenuPrimitive.GroupLabel
       className={cn(
@@ -280,7 +292,9 @@ function MenuGroupLabel({
       data-inset={inset}
       data-slot="menu-label"
       {...props}
-    />
+    >
+      {localizedChildren}
+    </MenuPrimitive.GroupLabel>
   );
 }
 
@@ -309,13 +323,16 @@ function MenuShortcut({ className, ...props }: React.ComponentProps<"kbd">) {
 
 // Trailing value on a menu row, such as the time a snooze preset wakes at.
 // Reads as text at the row's size; MenuShortcut is only for key chords.
-function MenuItemDetail({ className, ...props }: React.ComponentProps<"span">) {
+function MenuItemDetail({ className, children, ...props }: React.ComponentProps<"span">) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <span
       className={cn("ms-auto shrink-0 ps-4 text-secondary-label tabular-nums", className)}
       data-slot="menu-item-detail"
       {...props}
-    />
+    >
+      {localizedChildren}
+    </span>
   );
 }
 
@@ -333,6 +350,7 @@ function MenuSubTrigger({
   inset?: boolean;
   density?: "default" | "touch";
 }) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <MenuPrimitive.SubmenuTrigger
       className={cn(
@@ -346,7 +364,7 @@ function MenuSubTrigger({
       data-slot="menu-sub-trigger"
       {...props}
     >
-      {children}
+      {localizedChildren}
       <ChevronRightIcon className="-me-0.5 ms-auto opacity-80" />
     </MenuPrimitive.SubmenuTrigger>
   );

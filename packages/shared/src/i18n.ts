@@ -6,7 +6,7 @@ const zhCNMessages: Readonly<Record<string, string>> = {
   ...zhCNExtraMessages,
 };
 
-export const UI_LOCALE_SETTINGS = ["system", "en", "zh-CN"] as const;
+const UI_LOCALE_SETTINGS = ["system", "en", "zh-CN"] as const;
 export type UiLocaleSetting = (typeof UI_LOCALE_SETTINGS)[number];
 export type AppLocale = Exclude<UiLocaleSetting, "system">;
 
@@ -25,11 +25,7 @@ export function resolveAppLocale(
   return "en";
 }
 
-export function translate(
-  locale: AppLocale,
-  source: string,
-  values?: TranslateValues,
-): string {
+export function translate(locale: AppLocale, source: string, values?: TranslateValues): string {
   const template = locale === "zh-CN" ? (zhCNMessages[source] ?? source) : source;
   if (values === undefined) return template;
   return template.replace(/\{(\w+)\}/g, (token, key: string) => {

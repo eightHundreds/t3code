@@ -66,7 +66,8 @@ export function CommandPaletteContent({
   ...commandProps
 }: CommandPaletteContentProps) {
   const t = useTranslate();
-  const actionLabel = typeof footerActionLabel === "string" ? t(footerActionLabel) : footerActionLabel;
+  const actionLabel =
+    typeof footerActionLabel === "string" ? t(footerActionLabel) : footerActionLabel;
   const closeLabel = typeof escapeLabel === "string" ? t(escapeLabel) : escapeLabel;
   return (
     <div className="contents" data-testid={testId}>
