@@ -2747,14 +2747,17 @@ export function resolveMockUpdateServerUrl(mockUpdateServerPort: number | undefi
 }
 
 // electron-builder reads user-agent syntax (pnpm/version), not packageManager syntax (pnpm@version).
-// electron-builder rejects versions that are not semver. `0.1.7.zh` stays the
-// label in the app and the installer filename; the package version is a prerelease.
+// electron-builder rejects versions that are not semver. `0.1.7.zh` and
+// `0.1.7.zh.1` stay the label in the app and the installer filename.
 export function electronBuilderPackageVersion(version: string): string {
-  return version.endsWith(".zh") ? `${version.slice(0, -3)}-zh` : version;
+  const edition = /^(.*)\.zh(?:\.(\d+))?$/.exec(version);
+  const base = edition?.[1];
+  if (base === undefined) return version;
+  return edition[2] === undefined ? `${base}-zh` : `${base}-zh.${edition[2]}`;
 }
 
 export function desktopArtifactName(version: string): string {
-  if (version.endsWith(".zh")) {
+  if (/\.zh(?:\.\d+)?$/.test(version)) {
     return `T3-Code-${version}-\${arch}.\${ext}`;
   }
   return "T3-Code-${version}-${arch}.${ext}";

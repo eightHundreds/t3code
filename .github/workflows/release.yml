@@ -7,6 +7,7 @@ on:
       - "!v*-nightly.*"
       - "!v*-preview.*"
       - "!v*.zh"
+      - "!v*.zh.*"
   schedule:
     # Avoid minute zero, when GitHub scheduled jobs are busiest.
     - cron: "8,38 * * * *"
