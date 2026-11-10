@@ -373,6 +373,7 @@ export interface ChatComposerProps {
   sideChatDisabledReason?: string | null;
   /** Arms a fresh session for the next message; absent where `/clear` is unavailable. */
   onFreshSession?: (() => void) | undefined;
+  contextAccessory?: React.ReactNode;
   environmentUnavailable: {
     readonly label: string;
     readonly connection: EnvironmentConnectionPresentation;
@@ -498,6 +499,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     onMultipleModelSelectionsChange: setMultipleModelSelections,
     activeThreadId,
     activeThread,
+    contextAccessory = null,
     promptHistoryEntries,
     forceExpandedOnMobile,
     projectSelectionRequired,
@@ -3594,6 +3596,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                     keepFullHistory={props.keepFullHistory}
                     onToggleKeepFullHistory={props.onToggleKeepFullHistory}
                   >
+                    {contextAccessory}
                     {speechInput.available ? (
                       <>
                         <ComposerSpeechRecordingPill

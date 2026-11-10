@@ -770,6 +770,17 @@ describe("ClaudeAdapterV2 context usage", () => {
       DateTime.makeUnsafe("2026-08-29T00:00:00.000Z"),
     );
     assert.strictEqual(usage.promptCacheExpiresAt, "2026-08-29T00:05:00.000Z");
+    assert.strictEqual(usage.cacheCreationTokens, undefined);
+    const reported = ClaudeAdapterV2.claudeProviderTurnTokenUsage(
+      {
+        input_tokens: 1,
+        output_tokens: 1,
+        cache_creation_input_tokens: 0,
+      },
+      null,
+      "2026-08-29T00:03:00.000Z",
+    );
+    assert.strictEqual(reported.cacheCreationTokens, 0);
   });
 });
 

@@ -302,6 +302,11 @@ export function claudeProviderTurnTokenUsage(
     maxTokens,
     inputTokens,
     cachedInputTokens: usage.cache_read_input_tokens ?? 0,
+    ...(typeof usage.cache_creation_input_tokens === "number" &&
+    Number.isFinite(usage.cache_creation_input_tokens) &&
+    usage.cache_creation_input_tokens >= 0
+      ? { cacheCreationTokens: usage.cache_creation_input_tokens }
+      : {}),
     outputTokens,
     reasoningOutputTokens: 0,
     ...(promptCacheTtlMs === undefined ? {} : { promptCacheTtlMs }),

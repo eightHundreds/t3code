@@ -704,4 +704,35 @@ export const zhCNExtraMessages: Readonly<Record<string, string>> = {
   Tip: "提示",
   Unarchive: "取消归档",
   Warning: "警告",
+  "Input tokens": "输入",
+  "Output tokens": "输出",
+  "Cache read": "缓存读取",
+  "Cache write": "缓存写入",
+  "Context {percent}%": "上下文 {percent}%",
+  "Context {tokens}": "上下文 {tokens}",
+  "Context is full": "上下文已满",
+  "Handoff failed": "交接失败",
+  "Handed off": "已交接",
+  "Writing handoff": "整理交接中",
+  "Handoff ready": "交接已就绪",
+  "Hand off to a new session": "交接到新会话",
+  "Continue in a new session": "开新会话继续",
+  "Continue without a handoff file": "仍然开新会话（不带交接）",
+  "Open the new session": "打开接续会话",
+  "Try the handoff again": "重试交接",
+  "Compact this session": "压缩当前会话",
+  "Could not hand off this session.": "无法交接这个会话。",
+  "Could not start the new session.": "无法开始新会话。",
+  "Could not settle this session.": "无法结束当前会话。",
+  "{title} (continued)": "{title}（续）",
+  "This session has no project folder, so it cannot write a handoff file.":
+    "这个会话没有项目目录，写不了交接文件。",
+  "This session still has {count} delegated tasks. List each task id, its status, and how the new session collects the result. Results still return to this session.":
+    "本会话还有 {count} 个委派子任务未结束：在交接里逐个列出 taskId、当前状态和新会话如何回收结果。它们的结果仍会送回本会话。",
+  "Stop expanding this task and write a handoff to this file: {path}\nInclude the goal, what is done, where the evidence is, what is left, decisions the user must make, and how to roll back. Keep only what is still true. Do not copy the chat transcript. {subtasks}\nEnd the reply with one plain line and no formatting, for example:\nHANDOFF: {path}\nAfter the handoff is written, stop. Do not take a new task.":
+    "请停止扩展当前任务，把交接写到这个文件：{path}\n内容包含：目标、已做、证据位置、未做、需要用户决定的事、回滚。只写仍有效的内容，不复制聊天记录。{subtasks}\n回复最后单独一行，不加任何格式，例如：\nHANDOFF: {path}\n写好交接后停止，不再接新任务。",
+  'Continue the session "{title}" ({threadId}). There is no handoff file. Read the old session with t3_thread_read, using threadId {threadId}, the message view, limit 50, and maxCharsPerItem 4000. Keep paging with nextPosition as afterPosition until hasMore is false, and continue a long message from nextTextOffset. Write the goal, what is done, what is left, and the decisions for the user into a HANDOFF file in this directory, then continue the unfinished work. Ask only when you are unsure. Do not guess at anything you have not read.':
+    "接手旧会话《{title}》（{threadId}）。没有交接文件：先用 t3_thread_read 读取旧会话，threadId 为 {threadId}，先读消息视图，limit 为 50，maxCharsPerItem 为 4000。用返回的 nextPosition 作为 afterPosition 继续向后翻页，直到 hasMore 为 false；长消息按 nextTextOffset 续读。整理出目标、已做、未做和需要用户决定的事，写成本目录下的 HANDOFF 文件，再按未完成事项继续。只有拿不准的地方再问用户。不要猜测没读到的内容。",
+  'Continue the session "{title}" ({threadId}). Read {path} completely and continue its unfinished work. Do not redo what it already verified.':
+    "接手旧会话《{title}》（{threadId}）。先完整读取 {path}，按其中未完成事项继续；已验证的部分不要重做。",
 };

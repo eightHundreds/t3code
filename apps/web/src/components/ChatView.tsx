@@ -259,6 +259,7 @@ import {
 } from "../state/entities";
 import { useEnvironmentShellHasSnapshot } from "../state/shell";
 import { ChatComposer, type ChatComposerHandle } from "./chat/ChatComposer";
+import { ContextSessionPanel } from "./chat/ContextSessionPanel";
 import { DraftHeroHeadline } from "./chat/DraftHeroHeadline";
 import { ExpandedImageDialogHost, openExpandedImagePreview } from "./chat/ExpandedImageDialog";
 import {
@@ -3561,6 +3562,20 @@ export default function ChatView(props: ChatViewProps) {
                                 }
                                 onMultipleModelSelectionsChange={setMultipleModelSelectionsStable}
                                 composerRef={composerRef}
+                                contextAccessory={
+                                  activeContextWindow !== null && serverThread !== null ? (
+                                    <ContextSessionPanel
+                                      environmentId={environmentId}
+                                      thread={serverThread}
+                                      projection={serverProjection}
+                                      usage={activeContextWindow}
+                                      workspaceRoot={activeWorkspaceRoot ?? null}
+                                      pendingSubtasks={pendingBackgroundTasks.length}
+                                      canCompact={!compactDisabled}
+                                      onCompact={() => composerRef.current?.compactContext()}
+                                    />
+                                  ) : null
+                                }
                                 composerDraftTarget={composerDraftTarget}
                                 environmentId={environmentId}
                                 attachmentUploadsCapabilityKnown={attachmentUploadsCapabilityKnown}
