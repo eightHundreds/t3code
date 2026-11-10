@@ -2747,6 +2747,22 @@ export function resolveMockUpdateServerUrl(mockUpdateServerPort: number | undefi
 }
 
 // electron-builder reads user-agent syntax (pnpm/version), not packageManager syntax (pnpm@version).
+// electron-builder rejects versions that are not semver. `0.1.7.zh` and
+// `0.1.7.zh.1` stay the label in the app and the installer filename.
+export function electronBuilderPackageVersion(version: string): string {
+  const edition = /^(.*)\.zh(?:\.(\d+))?$/.exec(version);
+  const base = edition?.[1];
+  if (base === undefined) return version;
+  return edition[2] === undefined ? `${base}-zh` : `${base}-zh.${edition[2]}`;
+}
+
+export function desktopArtifactName(version: string): string {
+  if (/\.zh(?:\.\d+)?$/.test(version)) {
+    return `T3-Code-${version}-\${arch}.\${ext}`;
+  }
+  return "T3-Code-${version}-${arch}.${ext}";
+}
+
 export function resolvePackageManagerUserAgent(packageManager: string): string {
   const trimmed = packageManager.trim();
   const versionSeparator = trimmed.lastIndexOf("@");
@@ -2783,7 +2799,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     afterPack: (yield* Path.Path).join(yield* RepoRoot, "scripts/prepare-server-compile-cache.cjs"),
     appId: DESKTOP_APP_ID,
     productName: resolveDesktopProductName(version),
-    artifactName: "T3-Code-${version}-${arch}.${ext}",
+    artifactName: desktopArtifactName(version),
     electronLanguages: [...DESKTOP_ELECTRON_LANGUAGES],
     files: [
       ...DESKTOP_FILE_EXCLUSIONS,
@@ -3870,8 +3886,8 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
       : undefined;
   const stagePackageJson: StagePackageJson = {
     name: "t3code",
-    version: appVersion,
-    buildVersion: appVersion,
+    version: electronBuilderPackageVersion(appVersion),
+    buildVersion: electronBuilderPackageVersion(appVersion),
     t3codeCommitHash: commitHash,
     // Read by apps/desktop/src/preview/Passkeys.ts; must match the signed entitlements.
     ...(macWebAuthn ? { t3codeWebAuthn: macWebAuthn } : {}),

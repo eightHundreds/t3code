@@ -201,6 +201,12 @@ describe("searchSettings", () => {
     }
   });
 
+  it("matches the interface language row in Chinese", () => {
+    expect(searchSettings("界面语言", SETTINGS_SEARCH_ITEMS, "zh-CN")[0]?.id).toBe(
+      "interface-language",
+    );
+  });
+
   it("keeps catalog result ids unique", () => {
     const ids = SETTINGS_SEARCH_ITEMS.map((item) => item.id);
     expect(new Set(ids).size).toBe(ids.length);

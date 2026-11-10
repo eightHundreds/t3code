@@ -22,6 +22,7 @@ import { cn } from "../../lib/utils";
 import { formatUpcomingTimestamp } from "../../timestampFormat";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { formatContextWindowCompactionMessage } from "./compaction.logic";
+import { ContextTokenDetails } from "./ContextTokenDetails";
 import { ThreadDetailsSection } from "./ThreadDetailsSection";
 
 const PACE_LABEL: Record<LimitPace, string> = {
@@ -130,6 +131,7 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
                   {formatContextWindowCompactionMessage(threshold)}
                 </span>
               ) : null}
+              <ContextTokenDetails usage={usage} />
             </>
           }
         />

@@ -18,11 +18,15 @@ vi.mock("../hooks/useTheme", () => ({
 }));
 vi.mock("../hooks/useCustomThemes", () => ({ useCustomThemes: () => [] }));
 vi.mock("../hooks/useEnvironmentTheme", () => ({ useEnvironmentThemeDefinitions: () => [] }));
-vi.mock("../hooks/useSettings", async (original) => ({
-  ...(await original<typeof import("../hooks/useSettings")>()),
-  useClientSettings: () => DEFAULT_CLIENT_SETTINGS,
-  useUpdateEnvironmentSettings: () => () => undefined,
-}));
+vi.mock("../hooks/useSettings", async (original) => {
+  const { setUiLocaleSetting } = await import("../uiLocale");
+  setUiLocaleSetting("en");
+  return {
+    ...(await original<typeof import("../hooks/useSettings")>()),
+    useClientSettings: () => ({ ...DEFAULT_CLIENT_SETTINGS, uiLocale: "en" as const }),
+    useUpdateEnvironmentSettings: () => () => undefined,
+  };
+});
 vi.mock("../hooks/useScratchProject", () => ({
   useScratchProject: () => ({ scratchEnvironmentId: () => null }),
 }));

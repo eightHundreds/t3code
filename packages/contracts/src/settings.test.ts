@@ -303,6 +303,16 @@ describe("resolveIdleCompaction", () => {
   });
 });
 
+describe("ClientSettings locale", () => {
+  it("defaults the interface to Simplified Chinese and accepts the other choices", () => {
+    expect(decodeClientSettings({}).uiLocale).toBe("zh-CN");
+    expect(decodeClientSettings({ uiLocale: "system" }).uiLocale).toBe("system");
+    expect(decodeClientSettings({ uiLocale: "en" }).uiLocale).toBe("en");
+    expect(decodeClientSettingsPatch({ uiLocale: "zh-CN" })).toEqual({ uiLocale: "zh-CN" });
+    expect(() => decodeClientSettings({ uiLocale: "fr" })).toThrow();
+  });
+});
+
 describe("ClientSettings notifications", () => {
   it("requires opt-in when existing settings omit notification preferences", () => {
     expect(decodeClientSettings({}).notificationMode).toBe("off");

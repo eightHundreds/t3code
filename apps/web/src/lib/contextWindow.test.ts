@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test";
 import { OrchestrationV2ProviderTurnTokenUsage } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 import { formatContextWindowCompactionMessage } from "../components/chat/compaction.logic";
+import { formatContextWindowTokens } from "./contextWindow";
 import * as DateTime from "effect/DateTime";
 import {
   ContextTransferId,
@@ -205,5 +206,37 @@ describe("latestProviderTurnTokenUsage", () => {
     ]) {
       expect(latestProviderTurnTokenUsage([], { ...projection, contextTransfers })).toBeNull();
     }
+  });
+
+  it("keeps a reported cache write of 0 and leaves an omitted one unknown", () => {
+    const reported = deriveLatestContextWindowSnapshot([], {
+      usedTokens: 10,
+      cacheCreationTokens: 0,
+      inputTokens: 4,
+      cachedInputTokens: 0,
+      outputTokens: 6,
+      updatedAt: "2026-10-19T12:10:00.000Z",
+    });
+    expect(reported).toMatchObject({
+      cacheCreationTokens: 0,
+      inputTokens: 4,
+      cachedInputTokens: 0,
+      outputTokens: 6,
+    });
+    const omitted = deriveLatestContextWindowSnapshot([], {
+      usedTokens: 10,
+      updatedAt: "2026-10-19T12:10:00.000Z",
+    });
+    expect(omitted?.cacheCreationTokens).toBeNull();
+    expect(omitted?.inputTokens).toBeNull();
+  });
+});
+
+describe("formatContextWindowTokens", () => {
+  it("shows unreported values as ? and keeps a real zero", () => {
+    expect(formatContextWindowTokens(null)).toBe("?");
+    expect(formatContextWindowTokens(Number.NaN)).toBe("?");
+    expect(formatContextWindowTokens(0)).toBe("0");
+    expect(formatContextWindowTokens(1_500)).toBe("1.5k");
   });
 });

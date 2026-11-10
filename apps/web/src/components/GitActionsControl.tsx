@@ -22,6 +22,7 @@ import type {
 import { useNavigate } from "@tanstack/react-router";
 import * as Option from "effect/Option";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useTranslate } from "~/i18n";
 import { useDeadlinePassed } from "../hooks/useDeadline";
 import { useNowSecond } from "../hooks/useNowSecond";
 import { flushSync } from "react-dom";
@@ -429,6 +430,7 @@ interface PublishRepositoryDialogProps {
 }
 
 function PublishRepositoryDialog(props: PublishRepositoryDialogProps) {
+  const t = useTranslate();
   const openLink = useOpenLink(props.threadRef);
   const navigate = useNavigate();
   const sourceControlDiscovery = useEnvironmentQuery(
@@ -636,13 +638,15 @@ function PublishRepositoryDialog(props: PublishRepositoryDialogProps) {
                                 openSourceControlSettings();
                               }}
                             >
-                              Setup Required
+                              {t("Setup Required")}
                             </Button>
                           }
                         />
                         <TooltipPopup side="top" align="end">
-                          {readiness.hint ??
-                            "Open Settings -> Source control to configure this provider."}
+                          {t(
+                            readiness.hint ??
+                              "Open Settings -> Source control to configure this provider.",
+                          )}
                         </TooltipPopup>
                       </Tooltip>
                     </div>
@@ -933,6 +937,7 @@ export default function GitActionsControl({
   showChanges = true,
   onOpenChanges,
 }: GitActionsControlProps) {
+  const t = useTranslate();
   const panelAnchorRef = useRef<HTMLDivElement | null>(null);
   const updateThreadMetadata = useAtomCommand(
     threadEnvironment.updateMetadata,
@@ -1436,7 +1441,7 @@ export default function GitActionsControl({
                 </MenuItem>
               </PopoverTrigger>
               <PopoverPopup tooltipStyle side="left" align="center">
-                {disabledReason}
+                {t(disabledReason)}
               </PopoverPopup>
             </Popover>
           );
@@ -1557,11 +1562,11 @@ export default function GitActionsControl({
                     cn("not-sr-only ml-0 truncate", THREAD_DETAILS_PANEL_LABEL_CLASS),
                   )}
                 >
-                  {quickAction.label}
+                  {t(quickAction.label)}
                 </span>
               </PopoverTrigger>
               <PopoverPopup tooltipStyle side="bottom" align="start">
-                {quickActionDisabledReason}
+                {t(quickActionDisabledReason)}
               </PopoverPopup>
             </Popover>
           ) : (
@@ -1584,7 +1589,7 @@ export default function GitActionsControl({
                   cn("not-sr-only ml-0 truncate", THREAD_DETAILS_PANEL_LABEL_CLASS),
                 )}
               >
-                {quickAction.label}
+                {t(quickAction.label)}
               </span>
             </ThreadDetailsControl>
           )}
@@ -1692,8 +1697,8 @@ export default function GitActionsControl({
       >
         <DialogPopup>
           <DialogHeader>
-            <DialogTitle>{COMMIT_DIALOG_TITLE}</DialogTitle>
-            <DialogDescription>{COMMIT_DIALOG_DESCRIPTION}</DialogDescription>
+            <DialogTitle>{t(COMMIT_DIALOG_TITLE)}</DialogTitle>
+            <DialogDescription>{t(COMMIT_DIALOG_DESCRIPTION)}</DialogDescription>
           </DialogHeader>
           <DialogPanel>
             <div className="space-y-3 rounded-xl bg-zinc-25 p-3 text-sm ring-1 ring-black/5 dark:bg-white/[0.035] dark:ring-white/5">

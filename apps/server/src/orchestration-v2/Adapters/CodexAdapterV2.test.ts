@@ -118,6 +118,31 @@ describe("CodexAdapterV2 context usage", () => {
       reasoningOutputTokens: 1_000,
       updatedAt: "2026-08-29T00:00:00.000Z",
     });
+    assert.strictEqual(usage.cacheCreationTokens, undefined);
+
+    const reported = CodexAdapterV2.codexProviderTurnTokenUsage(
+      {
+        total: {
+          totalTokens: 180_000,
+          inputTokens: 160_000,
+          cachedInputTokens: 20_000,
+          outputTokens: 20_000,
+          reasoningOutputTokens: 5_000,
+          cacheWriteInputTokens: 12,
+        },
+        last: {
+          totalTokens: 50_000,
+          inputTokens: 45_000,
+          cachedInputTokens: 10_000,
+          outputTokens: 5_000,
+          reasoningOutputTokens: 1_000,
+          cacheWriteInputTokens: 0,
+        },
+        modelContextWindow: 200_000,
+      },
+      "2026-08-29T00:00:00.000Z",
+    );
+    assert.strictEqual(reported.cacheCreationTokens, 0);
   });
 });
 

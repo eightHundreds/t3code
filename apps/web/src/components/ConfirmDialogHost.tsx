@@ -15,6 +15,7 @@ import {
   AlertDialogPopup,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { useTranslate } from "../i18n";
 import { Button } from "./ui/button";
 
 type ConfirmationCopy = {
@@ -57,7 +58,10 @@ export function ConfirmDialogHost() {
     readConfirmDialogState,
   );
 
+  const t = useTranslate();
   const copy = resolveConfirmDialogCopy(state.status === "idle" ? "" : state.message);
+  const title = t(copy.title);
+  const description = copy.description === null ? null : t(copy.description);
   const confirmVariant = state.status === "idle" ? "default" : state.variant;
   const onCancel = () => respondToConfirmDialog(false);
   const onConfirm = () => respondToConfirmDialog(true);
@@ -74,17 +78,17 @@ export function ConfirmDialogHost() {
     >
       <AlertDialogPopup>
         <AlertDialogHeader>
-          <AlertDialogTitle>{copy.title}</AlertDialogTitle>
-          {copy.description ? (
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          {description ? (
             <AlertDialogDescription className="whitespace-pre-line">
-              {copy.description}
+              {description}
             </AlertDialogDescription>
           ) : null}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+          <AlertDialogClose render={<Button variant="outline" />}>{t("Cancel")}</AlertDialogClose>
           <Button variant={confirmVariant} onClick={onConfirm}>
-            Confirm
+            {t("Confirm")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogPopup>

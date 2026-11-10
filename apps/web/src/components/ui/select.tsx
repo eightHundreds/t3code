@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import type * as React from "react";
 
+import { useLocalizedText } from "~/uiLocale";
 import { cn } from "~/lib/utils";
 
 const Select = SelectPrimitive.Root;
@@ -65,6 +66,7 @@ function SelectButton({
   render,
   ...props
 }: useRender.ComponentProps<"button"> & Pick<VariantProps<typeof selectTriggerVariants>, "size">) {
+  const localizedChildren = useLocalizedText(children);
   const defaultProps = {
     className: cn(selectTriggerVariants({ size }), className),
     "data-slot": "select-trigger",
@@ -76,7 +78,7 @@ function SelectButton({
       ...mergeProps<"button">(defaultProps, props),
       children: (
         <>
-          <span className="min-w-0 flex-1 truncate text-left">{children}</span>
+          <span className="min-w-0 flex-1 truncate text-left">{localizedChildren}</span>
           <ChevronDownIcon aria-hidden className="-me-1 size-3.5 shrink-0 opacity-70" />
         </>
       ),
@@ -171,6 +173,7 @@ function SelectItem({
 }: SelectPrimitive.Item.Props & {
   hideIndicator?: boolean;
 }) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <SelectPrimitive.Item
       className={cn(
@@ -184,7 +187,7 @@ function SelectItem({
         className="min-w-0 flex-1 [&_svg:not([class*='text-'])]:text-muted-foreground"
         data-slot="select-item-text"
       >
-        {children}
+        {localizedChildren}
       </SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   );
@@ -194,13 +197,16 @@ function SelectGroup(props: SelectPrimitive.Group.Props) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
-function SelectGroupLabel(props: SelectPrimitive.GroupLabel.Props) {
+function SelectGroupLabel({ children, ...props }: SelectPrimitive.GroupLabel.Props) {
+  const localizedChildren = useLocalizedText(children);
   return (
     <SelectPrimitive.GroupLabel
       className="px-2 py-1.5 font-medium text-muted-foreground text-xs"
       data-slot="select-group-label"
       {...props}
-    />
+    >
+      {localizedChildren}
+    </SelectPrimitive.GroupLabel>
   );
 }
 

@@ -3,6 +3,17 @@ import type { ConfirmDialogOptions, ContextMenuItem, LocalApi } from "@t3tools/c
 import { requestConfirmDialog } from "./confirmDialog";
 import { dismissContextMenu, showContextMenuFallback } from "./contextMenuFallback";
 import { readBrowserClientSettings, writeBrowserClientSettings } from "./clientPersistenceStorage";
+import { translateUi } from "./uiLocale";
+
+function localizeMenuItems<T extends string>(
+  items: readonly ContextMenuItem<T>[],
+): ContextMenuItem<T>[] {
+  return items.map((item) => ({
+    ...item,
+    label: translateUi(item.label),
+    ...(item.children === undefined ? {} : { children: localizeMenuItems(item.children) }),
+  }));
+}
 
 let cachedApi: LocalApi | undefined;
 
@@ -44,10 +55,14 @@ export function createLocalApi(): LocalApi {
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
       ): Promise<T | null> => {
+        const localizedItems = localizeMenuItems(items);
         if (window.desktopBridge) {
-          return window.desktopBridge.showContextMenu(items, position) as Promise<T | null>;
+          return window.desktopBridge.showContextMenu(
+            localizedItems,
+            position,
+          ) as Promise<T | null>;
         }
-        return showContextMenuFallback(items, position);
+        return showContextMenuFallback(localizedItems, position);
       },
       // Unlike native menus, the DOM fallback needs dismissal when underlying state disappears.
       close: async () => {

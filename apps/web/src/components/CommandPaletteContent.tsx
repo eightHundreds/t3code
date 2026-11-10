@@ -1,6 +1,7 @@
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { type ComponentProps, type ReactNode, type RefObject } from "react";
 
+import { useTranslate } from "../i18n";
 import { Command, CommandFooter, CommandInput, CommandPanel } from "./ui/command";
 import { Kbd, KbdGroup } from "./ui/kbd";
 
@@ -64,6 +65,10 @@ export function CommandPaletteContent({
   testId,
   ...commandProps
 }: CommandPaletteContentProps) {
+  const t = useTranslate();
+  const actionLabel =
+    typeof footerActionLabel === "string" ? t(footerActionLabel) : footerActionLabel;
+  const closeLabel = typeof escapeLabel === "string" ? t(escapeLabel) : escapeLabel;
   return (
     <div className="contents" data-testid={testId}>
       <Command {...commandProps}>
@@ -99,23 +104,23 @@ export function CommandPaletteContent({
               <Kbd>
                 <ArrowDownIcon />
               </Kbd>
-              <span>Navigate</span>
+              <span>{t("Navigate")}</span>
             </KbdGroup>
             {footerActionLabel !== undefined ? (
               <KbdGroup>
                 <Kbd>Enter</Kbd>
-                <span>{footerActionLabel}</span>
+                <span>{actionLabel}</span>
               </KbdGroup>
             ) : null}
             {showBackHint ? (
               <KbdGroup>
                 <Kbd>Backspace</Kbd>
-                <span>Back</span>
+                <span>{t("Back")}</span>
               </KbdGroup>
             ) : null}
             <KbdGroup>
               <Kbd>Esc</Kbd>
-              <span>{escapeLabel}</span>
+              <span>{closeLabel}</span>
             </KbdGroup>
           </div>
           {footerTrailing}
