@@ -61,6 +61,7 @@ import {
   deviceHubReadiness,
 } from "~/components/device/DeviceSetup";
 import { isElectron } from "../../env";
+import { useTranslate } from "../../i18n";
 
 import { Badge } from "../ui/badge";
 import {
@@ -842,6 +843,7 @@ function DeviceIntegrationControls({
   enabled: boolean;
   agentAccessEnabled: boolean;
 }) {
+  const t = useTranslate();
   const canConfigure = useEnvironmentScope(environmentId, AuthSettingsWriteScope);
   const { state, loaded } = useDeviceState(environmentId);
   const { scope, environments, connectedEnvironments } = useSettingsScope();
@@ -886,7 +888,9 @@ function DeviceIntegrationControls({
       toastManager.add({
         type: "error",
         title: "Device settings not saved on all environments",
-        description: `Could not update ${failed.map((environment) => environment.label).join(", ")}.`,
+        description: t("Could not update {names}.", {
+          names: failed.map((environment) => environment.label).join(", "),
+        }),
       });
     }
   };
@@ -917,7 +921,7 @@ function DeviceIntegrationControls({
                   .finally(() => setPending(null));
               }}
             >
-              {pending === `update-${tool}` ? "Updating…" : "Update"}
+              {pending === `update-${tool}` ? t("Updating…") : t("Update")}
             </Button>
           ) : null}
           {state.supportsToolInspection ? (
@@ -933,7 +937,7 @@ function DeviceIntegrationControls({
                 );
               }}
             >
-              {pending === "check" ? "Checking…" : "Check versions"}
+              {pending === "check" ? t("Checking…") : t("Check versions")}
             </Button>
           ) : null}
         </div>
@@ -954,7 +958,7 @@ function DeviceIntegrationControls({
         settingKeys={["enableDeviceSupport"]}
         description={
           <>
-            Open simulators and emulators in the Device panel. Hub:{" "}
+            {t("Open simulators and emulators in the Device panel. Hub:")}{" "}
             <DeviceToolVersions
               action={versionActions("hub")}
               kind="hub"
@@ -976,7 +980,7 @@ function DeviceIntegrationControls({
                 busy ||
                 pending !== null
               }
-              aria-label="Device hub"
+              aria-label={t("Device hub")}
               onCheckedChange={(checked) =>
                 void update("hub", {
                   enabled: Boolean(checked),
@@ -993,7 +997,7 @@ function DeviceIntegrationControls({
         settingKeys={["enableAgentDeviceAccess"]}
         description={
           <>
-            New agent sessions can open and drive these devices. agent-device:{" "}
+            {t("New agent sessions can open and drive these devices. agent-device:")}{" "}
             <DeviceToolVersions
               action={versionActions("agent")}
               kind="agent"
@@ -1013,7 +1017,7 @@ function DeviceIntegrationControls({
                 (!projectScope && (!loaded || !anyHubEnabled || busy)) ||
                 pending !== null
               }
-              aria-label="Agent device access"
+              aria-label={t("Agent device access")}
               onCheckedChange={(checked) =>
                 projectScope
                   ? updateSettings({ enableAgentDeviceAccess: Boolean(checked) })

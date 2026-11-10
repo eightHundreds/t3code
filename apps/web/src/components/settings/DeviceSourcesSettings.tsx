@@ -16,6 +16,7 @@ import {
 } from "@t3tools/contracts";
 import { ChevronDownIcon, MoreVertical, PlusIcon } from "lucide-react";
 
+import { useTranslate } from "../../i18n";
 import { cn, randomUUID } from "../../lib/utils";
 import { deviceEnvironment } from "../../state/device";
 import { environmentAtomList, environmentIdsKey } from "../../state/environmentAtomList";
@@ -112,21 +113,29 @@ type Editing =
 function hostStatus(
   state: DeviceServiceState | undefined,
   hostId: string,
+  t: (source: string, values?: { readonly [key: string]: string | number }) => string,
 ): SourceStatus | undefined {
-  if (!state) return { tone: "pending", label: "Loading" };
+  if (!state) return { tone: "pending", label: t("Loading") };
   const status = state.hostStatuses[hostId];
   switch (status?.status) {
     case "ready": {
       const incomplete = incompleteListings(status);
       if (incomplete.length === 0) return undefined;
-      const list = incomplete.length > 1 ? "Device" : incomplete[0] === "ios" ? "iOS" : "Android";
-      return { tone: "warning", label: `${list} list may be incomplete`, detail: status.detail };
+      const platform = incomplete[0] === "ios" ? "iOS" : "Android";
+      return {
+        tone: "warning",
+        label:
+          incomplete.length > 1
+            ? t("Device list may be incomplete")
+            : t("{platform} list may be incomplete", { platform }),
+        detail: status.detail,
+      };
     }
     case "installing":
     case "starting":
-      return { tone: "pending", label: "Starting", detail: status.detail };
+      return { tone: "pending", label: t("Starting"), detail: status.detail };
     case "failed":
-      return { tone: "error", label: "Failed", detail: status.detail };
+      return { tone: "error", label: t("Failed"), detail: status.detail };
     default:
       return undefined;
   }
@@ -143,6 +152,7 @@ export function DeviceSourcesSettings(props: {
   readonly supportsEas: boolean;
   readonly supportsSimlock: boolean;
 }) {
+  const t = useTranslate();
   const { scope, environments, connectedEnvironments, environment: primary } = useSettingsScope();
   const projectScope = scope.kind === "project" || scope.kind === "checkout";
   const update = useAtomCommand(serverEnvironment.updateSettings, { reportFailure: false });
@@ -189,7 +199,9 @@ export function DeviceSourcesSettings(props: {
       toastManager.add({
         type: "error",
         title: failedTitle,
-        description: `This connection cannot change settings on ${unwritable.map((patch) => name(patch.environmentId)).join(", ")}.`,
+        description: t("This connection cannot change settings on {names}.", {
+          names: unwritable.map((patch) => name(patch.environmentId)).join(", "),
+        }),
       });
       return false;
     }
@@ -313,8 +325,12 @@ export function DeviceSourcesSettings(props: {
     toastManager.add({
       type: failed.length ? "error" : "success",
       title: failed.length
-        ? `${host.label}: ${failed.length} of ${targets.length} environments failed`
-        : `${host.label}: connection checks passed`,
+        ? t("{label}: {failed} of {total} environments failed", {
+            label: host.label,
+            failed: failed.length,
+            total: targets.length,
+          })
+        : t("{label}: connection checks passed", { label: host.label }),
       description: failed.length
         ? failed
             .map((target) => {
@@ -332,12 +348,17 @@ export function DeviceSourcesSettings(props: {
   const rowActions = (onEdit: () => void, onRemove: () => void, extra?: ReactNode) => (
     <>
       <Button size="sm" variant="outline" disabled={disabled} onClick={onEdit}>
-        Edit
+        {t("Edit")}
       </Button>
       <Menu>
         <MenuTrigger
           render={
-            <Button size="icon-sm" variant="ghost-muted" disabled={disabled} aria-label="More" />
+            <Button
+              size="icon-sm"
+              variant="ghost-muted"
+              disabled={disabled}
+              aria-label={t("More")}
+            />
           }
         >
           <MoreVertical />
@@ -345,7 +366,7 @@ export function DeviceSourcesSettings(props: {
         <MenuPopup align="end">
           {extra}
           <MenuItem variant="destructive" onClick={onRemove}>
-            Remove
+            {t("Remove")}
           </MenuItem>
         </MenuPopup>
       </Menu>
@@ -364,7 +385,9 @@ export function DeviceSourcesSettings(props: {
         : "Simulators and emulators installed on this environment's machine.",
     environments: active.map((member) => {
       const local = member.state?.hosts.find((host) => host.kind === "local");
-      const status = local ? hostStatus(member.state, local.id) : hostStatus(member.state, "");
+      const status = local
+        ? hostStatus(member.state, local.id, t)
+        : hostStatus(member.state, "", t);
       return {
         environmentId: member.environmentId,
         label: member.label,
@@ -375,7 +398,7 @@ export function DeviceSourcesSettings(props: {
             ? {
                 ...status,
                 action: {
-                  label: "Refresh",
+                  label: t("Refresh"),
                   run: () => void list({ environmentId: member.environmentId, input: {} }),
                 },
               }
@@ -416,8 +439,8 @@ export function DeviceSourcesSettings(props: {
         if (!held)
           return { environmentId: member.environmentId, label: member.label, added: false };
         const status = testing.has(host.id)
-          ? ({ tone: "pending", label: "Testing connection" } as const)
-          : hostStatus(member.state, held.host.id);
+          ? ({ tone: "pending", label: t("Testing connection") } as const)
+          : hostStatus(member.state, held.host.id, t);
         return {
           environmentId: member.environmentId,
           label: member.label,
@@ -427,8 +450,11 @@ export function DeviceSourcesSettings(props: {
             status?.tone === "error" && member.state?.supportsHostRetry
               ? {
                   ...status,
-                  label: "Can't connect",
-                  action: { label: "Retry", run: () => retry(member.environmentId, held.host.id) },
+                  label: t("Can't connect"),
+                  action: {
+                    label: t("Retry"),
+                    run: () => retry(member.environmentId, held.host.id),
+                  },
                 }
               : status,
         };
@@ -437,7 +463,7 @@ export function DeviceSourcesSettings(props: {
         () =>
           setEditing({ kind: "ssh", host, original: host, ...(grouped ? {} : { only: holders }) }),
         () => void saveSsh(host, true, host, holders),
-        <MenuItem onClick={() => void testSsh(host)}>Test connection</MenuItem>,
+        <MenuItem onClick={() => void testSsh(host)}>{t("Test connection")}</MenuItem>,
       ),
     });
   }
@@ -461,7 +487,7 @@ export function DeviceSourcesSettings(props: {
         shared: true,
         title: host.label,
         kind: "EAS",
-        description: easSessionLimits(host),
+        description: easSessionLimits(host, t),
         environments: active.map((member) => {
           const added = (member.settings?.easDeviceHosts ?? []).some(
             (candidate) => candidate.id === host.id,
@@ -472,7 +498,7 @@ export function DeviceSourcesSettings(props: {
             added,
             ...(added
               ? {
-                  status: hostStatus(member.state, host.id),
+                  status: hostStatus(member.state, host.id, t),
                   platforms: hostPlatforms(member.state, host.id),
                 }
               : {}),
@@ -498,7 +524,7 @@ export function DeviceSourcesSettings(props: {
         shared: true,
         title: host.label,
         kind: "Simlock",
-        description: `${host.gatewayUrl.replace(/^https?:\/\//, "")} · ${simlockLeaseLimits(host)}`,
+        description: `${host.gatewayUrl.replace(/^https?:\/\//, "")} · ${simlockLeaseLimits(host, t)}`,
         environments: active.map((member) => {
           const held = (member.settings?.simlockDeviceHosts ?? []).find(
             (candidate) => candidate.id === host.id,
@@ -511,7 +537,7 @@ export function DeviceSourcesSettings(props: {
             added: true,
             platforms: hostPlatforms(member.state, host.id),
             // A blank token can still resolve to the machine's own, so the host's answer decides.
-            status: hostStatus(member.state, host.id),
+            status: hostStatus(member.state, host.id, t),
           };
         }),
         actions: rowActions(edit, () => removeSimlock(host)),
@@ -524,7 +550,7 @@ export function DeviceSourcesSettings(props: {
       <MenuTrigger
         render={<Button size="sm" variant="outline" disabled={disabled || editing !== null} />}
       >
-        <PlusIcon className="size-3.5" /> Add source
+        <PlusIcon className="size-3.5" /> {t("Add source")}
         <ChevronDownIcon className="size-3.5" />
       </MenuTrigger>
       <MenuPopup align="end">
@@ -537,7 +563,7 @@ export function DeviceSourcesSettings(props: {
             })
           }
         >
-          Machine over SSH
+          {t("Machine over SSH")}
         </MenuItem>
         {props.supportsEas ? (
           <MenuItem
@@ -551,7 +577,7 @@ export function DeviceSourcesSettings(props: {
               })
             }
           >
-            EAS Simulator
+            {t("EAS Simulator")}
           </MenuItem>
         ) : null}
         {props.supportsSimlock && simlockEnabled ? (
@@ -560,7 +586,7 @@ export function DeviceSourcesSettings(props: {
               setEditing({ kind: "simlock", host: newSimlockDeviceHost(randomUUID()), isNew: true })
             }
           >
-            Simlock pool (alpha)
+            {t("Simlock pool (alpha)")}
           </MenuItem>
         ) : null}
       </MenuPopup>
@@ -630,6 +656,7 @@ function PlatformIcon(props: {
   row: SourceRow;
   known: ReadonlyArray<SourceEnvironment>;
 }) {
+  const t = useTranslate();
   const availability = (environment: SourceEnvironment) =>
     environment.platforms?.find((candidate) => candidate.platform === props.platform);
   const availableOn = props.known.filter((environment) => availability(environment)?.available);
@@ -647,6 +674,7 @@ function PlatformIcon(props: {
   const unavailableOn = props.known.filter((environment) => !availability(environment)?.available);
   const connected = props.row.environments.filter((environment) => environment.added);
   const notAdded = props.row.environments.filter((environment) => !environment.added);
+  const title = props.row.shared ? props.row.title : t(props.row.title);
   return (
     <Popover>
       <PopoverTrigger
@@ -656,7 +684,10 @@ function PlatformIcon(props: {
         render={
           <button
             type="button"
-            aria-label={`${props.row.title}: ${props.label} ${available ? "available" : "not available"}`}
+            aria-label={t(
+              available ? "{title}: {platform} available" : "{title}: {platform} not available",
+              { title, platform: props.label },
+            )}
             className={cn(
               "relative grid size-6 shrink-0 place-items-center rounded-md outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
               available ? "text-foreground" : "text-muted-foreground/45",
@@ -675,7 +706,7 @@ function PlatformIcon(props: {
       <PopoverPopup side="top" align="end" width="sm">
         <p className="text-sm font-medium">
           {props.label}{" "}
-          {available ? (partial ? "available on some" : "available") : "not available"}
+          {available ? (partial ? t("available on some") : t("available")) : t("not available")}
         </p>
         {props.row.shared ? (
           <>
@@ -697,7 +728,7 @@ function PlatformIcon(props: {
                 ).map(([heading, environments]) =>
                   environments.length > 0 ? (
                     <div key={heading}>
-                      <dt className="text-muted-foreground">{heading}</dt>
+                      <dt className="text-muted-foreground">{t(heading)}</dt>
                       {environments.map((environment) => {
                         const reason =
                           heading === "Not available"
@@ -726,7 +757,7 @@ function PlatformIcon(props: {
                 <Fragment key={environment.environmentId}>
                   <dt className="text-muted-foreground">{environment.label}</dt>
                   <dd className={entry?.available ? "" : "text-muted-foreground"}>
-                    {entry?.available ? "Available" : (entry?.reason ?? "Not available")}
+                    {entry?.available ? t("Available") : (entry?.reason ?? t("Not available"))}
                   </dd>
                 </Fragment>
               );
@@ -734,7 +765,7 @@ function PlatformIcon(props: {
           </dl>
         ) : !available ? (
           <p className="mt-1 text-xs text-muted-foreground">
-            {availability(props.known[0]!)?.reason ?? "Not set up on this machine."}
+            {availability(props.known[0]!)?.reason ?? t("Not set up on this machine.")}
           </p>
         ) : null}
       </PopoverPopup>
@@ -743,7 +774,11 @@ function PlatformIcon(props: {
 }
 
 function DeviceSourceRow(props: { row: SourceRow }) {
+  const t = useTranslate();
   const { row } = props;
+  const title = row.shared ? row.title : t(row.title);
+  const description =
+    row.shared || typeof row.description !== "string" ? row.description : t(row.description);
   const several = row.environments.length > 1;
   const issues = row.environments.filter(
     (environment): environment is SourceEnvironment & { status: SourceStatus } =>
@@ -755,14 +790,14 @@ function DeviceSourceRow(props: { row: SourceRow }) {
     <div className="flex items-center gap-3 border-t border-border/60 px-3 py-3 first:border-t-0 sm:px-4">
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
-          <p className="truncate text-sm font-medium">{row.title}</p>
+          <p className="truncate text-sm font-medium">{title}</p>
           {row.kind ? (
             <span className="shrink-0 rounded border border-border px-1 text-3xs uppercase tracking-wide text-muted-foreground">
               {row.kind}
             </span>
           ) : null}
         </div>
-        <p className="truncate text-xs text-muted-foreground">{row.description}</p>
+        <p className="truncate text-xs text-muted-foreground">{description}</p>
         {problems.map((environment) => (
           <p
             key={environment.environmentId}
@@ -780,7 +815,7 @@ function DeviceSourceRow(props: { row: SourceRow }) {
             </span>
             {environment.status.tone === "warning" && environment.status.detail ? (
               <Popover>
-                <PopoverTrigger render={<InlineButton />}>Details</PopoverTrigger>
+                <PopoverTrigger render={<InlineButton />}>{t("Details")}</PopoverTrigger>
                 <PopoverPopup side="bottom" align="start" width="lg" padding="compact">
                   <p className="whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
                     {environment.status.detail}
