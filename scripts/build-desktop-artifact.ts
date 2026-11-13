@@ -2751,7 +2751,8 @@ export function resolveMockUpdateServerUrl(mockUpdateServerPort: number | undefi
 // `0.1.7.zh.1` stay the label in the app and the installer filename.
 export function electronBuilderPackageVersion(version: string): string {
   const edition = /^(.*)\.zh(?:\.(\d+))?$/.exec(version);
-  const base = edition?.[1];
+  if (edition === null) return version;
+  const base = edition[1];
   if (base === undefined) return version;
   return edition[2] === undefined ? `${base}-zh` : `${base}-zh.${edition[2]}`;
 }

@@ -5,11 +5,18 @@ import { beforeEach, describe, expect, it } from "vite-plus/test";
 
 import {
   resolveToolCallDiffTarget,
+  selectThreadDiffPanelSelection,
   useDiffPanelSessionStore,
   useDiffPanelStore,
 } from "./diffPanelStore";
 
 describe("diffPanelStore", () => {
+  it("opens on uncommitted changes until this thread has a saved scope", () => {
+    const ref = { environmentId: EnvironmentId.make("env"), threadId: ThreadId.make("thread") };
+    expect(selectThreadDiffPanelSelection({}, ref)).toEqual({ kind: "unstaged" });
+    expect(selectThreadDiffPanelSelection({}, null)).toEqual({ kind: "unstaged" });
+  });
+
   beforeEach(() => {
     useDiffPanelStore.setState({
       byThreadKey: {},

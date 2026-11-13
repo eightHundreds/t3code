@@ -1754,6 +1754,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
 it("keeps a .zh edition label in the installer filename", () => {
   assert.equal(electronBuilderPackageVersion("0.1.7.zh"), "0.1.7-zh");
   assert.equal(electronBuilderPackageVersion("0.1.7.zh.1"), "0.1.7-zh.1");
+  assert.equal(electronBuilderPackageVersion("0.1.9.zh"), "0.1.9-zh");
   assert.equal(electronBuilderPackageVersion("0.1.7"), "0.1.7");
   assert.equal(desktopArtifactName("0.1.7.zh"), "T3-Code-0.1.7.zh-${arch}.${ext}");
   assert.equal(desktopArtifactName("0.1.7.zh.1"), "T3-Code-0.1.7.zh.1-${arch}.${ext}");

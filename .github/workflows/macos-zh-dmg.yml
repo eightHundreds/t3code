@@ -25,11 +25,11 @@ on:
       version:
         description: 界面版本号。electron-builder 会把 .zh 和 .zh.1 收成 semver 预发布号
         required: false
-        default: 0.1.7.zh.1
+        default: 0.1.9.zh
       release_tag:
         description: 上传到的 GitHub Release 标签
         required: false
-        default: v0.1.7.zh.1
+        default: v0.1.9.zh
 
 permissions:
   contents: write
@@ -71,7 +71,7 @@ jobs:
           T3CODE_DESKTOP_PLATFORM: mac
           T3CODE_DESKTOP_TARGET: dmg
           T3CODE_DESKTOP_ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
-          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh.1' }}
+          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.9.zh' }}
           T3CODE_DESKTOP_SIGNED: "false"
         run: |
           set -euo pipefail
@@ -89,9 +89,9 @@ jobs:
       - name: Upload to release
         shell: bash
         env:
-          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.7.zh.1' }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.9.zh' }}
           ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
-          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.7.zh.1' }}
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.9.zh' }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -106,7 +106,8 @@ jobs:
           {
             echo "中文界面版本 ${VERSION} 的 macOS ${ARCH} 安装包（未签名）。"
             echo
-            echo "这一版包含长会话上下文：占用、输入、输出、缓存读取、缓存写入，以及交接到新会话。"
+            echo "基于上游 v0.1.9。包含简体中文界面，以及长会话上下文。"
+            echo "Diff 页在没有记住上次选择时，默认打开 Uncommitted。"
             echo
             echo "下载 DMG 后，如果系统提示已损坏或无法打开："
             echo

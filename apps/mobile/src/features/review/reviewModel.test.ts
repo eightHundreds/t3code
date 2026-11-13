@@ -22,7 +22,11 @@ describe("resolveReviewSelectedSectionId", () => {
   const turn = makeSection("turn:2");
   const changes = makeSection("git:branch-range");
 
-  it("shows Changes before anything is picked, not the first section", () => {
+  it("shows Uncommitted before anything is picked, and Changes when that section is absent", () => {
+    const uncommitted = makeSection("git:working-tree");
+    expect(resolveReviewSelectedSectionId([turn, changes, uncommitted], null)).toBe(
+      "git:working-tree",
+    );
     expect(resolveReviewSelectedSectionId([turn, changes], null)).toBe("git:branch-range");
   });
 
