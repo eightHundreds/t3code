@@ -2690,6 +2690,7 @@ export function resolveDesktopRuntimeDependencies(
 
 export const resolveGitHubPublishConfig = Effect.fn("resolveGitHubPublishConfig")(function* (
   updateChannel: "latest" | "nightly",
+  version: string,
 ) {
   const env = yield* Config.all({
     updateRepository: Config.String("T3CODE_DESKTOP_UPDATE_REPOSITORY").pipe(Config.option),
@@ -2705,12 +2706,20 @@ export const resolveGitHubPublishConfig = Effect.fn("resolveGitHubPublishConfig"
   const [owner, repo, ...rest] = rawRepo.split("/");
   if (!owner || !repo || rest.length > 0) return undefined;
 
+  // `0.1.9.zh` becomes semver `0.1.9-zh`. electron-builder would otherwise name the
+  // feed `zh-mac.yml`, while the installed app on the stable channel reads `latest-mac.yml`.
+  const pinLatestFeed =
+    updateChannel === "latest" && /-zh(?:\.\d+)?$/.test(electronBuilderPackageVersion(version));
   return {
     provider: "github",
     owner,
     repo,
     releaseType: updateChannel === "nightly" ? "prerelease" : "release",
-    ...(updateChannel === "nightly" ? { channel: "nightly" as const } : {}),
+    ...(updateChannel === "nightly"
+      ? { channel: "nightly" as const }
+      : pinLatestFeed
+        ? { channel: "latest" as const }
+        : {}),
   };
 });
 
@@ -2829,7 +2838,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
   // Missing publish config infers a GitHub feed from tokens; staging has no repository, so manifest generation would crash.
   buildConfig.publish = null;
   if (!isDesktopPreviewVersion(version)) {
-    const publishConfig = yield* resolveGitHubPublishConfig(updateChannel);
+    const publishConfig = yield* resolveGitHubPublishConfig(updateChannel, version);
     if (publishConfig) {
       buildConfig.publish = [publishConfig];
     } else if (mockUpdates) {

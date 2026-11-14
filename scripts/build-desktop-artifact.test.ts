@@ -530,6 +530,16 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
         undefined,
       );
 
+      const zhRelease = yield* createBuildConfig(
+        "mac",
+        "dmg",
+        "0.1.9.zh",
+        false,
+        false,
+        undefined,
+        undefined,
+      );
+
       assert.isNull(preview.publish);
       assert.isNull(previewChannel.publish);
       assert.deepStrictEqual(release.publish, [
@@ -538,6 +548,15 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
           owner: "pingdotgg",
           repo: "t3code",
           releaseType: "release",
+        },
+      ]);
+      assert.deepStrictEqual(zhRelease.publish, [
+        {
+          provider: "github",
+          owner: "pingdotgg",
+          repo: "t3code",
+          releaseType: "release",
+          channel: "latest",
         },
       ]);
     }).pipe(

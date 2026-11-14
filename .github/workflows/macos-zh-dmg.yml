@@ -96,12 +96,25 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          files=(release/T3-Code-*.dmg release/T3-Code-*.zip)
-          if (( ${#files[@]} == 0 )); then
+          # The installed app reads latest-mac.yml, then the zip named inside it.
+          installers=(release/T3-Code-*.dmg release/T3-Code-*.zip)
+          if (( ${#installers[@]} == 0 )); then
             echo "release/ 里没有 dmg 或 zip" >&2
             ls -la release || true
             exit 1
           fi
+          if [[ ! -f release/latest-mac.yml ]]; then
+            echo "release/ 里没有 latest-mac.yml，已安装的应用检查不到这个发布" >&2
+            ls -la release || true
+            exit 1
+          fi
+          files=("${installers[@]}" release/*.blockmap)
+          for manifest in release/*.yml; do
+            if [[ "$(basename "$manifest")" == "builder-debug.yml" ]]; then
+              continue
+            fi
+            files+=("$manifest")
+          done
           sha="$(git rev-parse HEAD)"
           {
             echo "中文界面版本 ${VERSION} 的 macOS ${ARCH} 安装包（未签名）。"
