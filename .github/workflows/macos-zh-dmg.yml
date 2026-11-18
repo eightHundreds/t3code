@@ -25,11 +25,11 @@ on:
       version:
         description: 界面版本号。electron-builder 会把 .zh 和 .zh.1 收成 semver 预发布号
         required: false
-        default: 0.1.10.zh
+        default: 0.1.10.zh.1
       release_tag:
         description: 上传到的 GitHub Release 标签
         required: false
-        default: v0.1.10.zh
+        default: v0.1.10.zh.1
 
 permissions:
   contents: write
@@ -71,7 +71,7 @@ jobs:
           T3CODE_DESKTOP_PLATFORM: mac
           T3CODE_DESKTOP_TARGET: dmg
           T3CODE_DESKTOP_ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
-          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.10.zh' }}
+          T3CODE_DESKTOP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.10.zh.1' }}
           T3CODE_DESKTOP_SIGNED: "false"
         run: |
           set -euo pipefail
@@ -89,9 +89,9 @@ jobs:
       - name: Upload to release
         shell: bash
         env:
-          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.10.zh' }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'v0.1.10.zh.1' }}
           ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'arm64' }}
-          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.10.zh' }}
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.10.zh.1' }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -137,11 +137,12 @@ jobs:
           } > "$RUNNER_TEMP/release-notes.md"
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "${files[@]}" --repo "$GITHUB_REPOSITORY" --clobber
-            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/release-notes.md"
+            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --latest --notes-file "$RUNNER_TEMP/release-notes.md"
           else
             gh release create "$RELEASE_TAG" "${files[@]}" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$sha" \
+              --latest \
               --title "T3 Code ${VERSION}" \
               --notes-file "$RUNNER_TEMP/release-notes.md"
           fi

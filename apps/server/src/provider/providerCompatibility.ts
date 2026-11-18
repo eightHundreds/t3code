@@ -60,8 +60,11 @@ export function resolveProviderCompatibility(
   version: string | null,
   t3CodeVersion = packageJson.version,
 ): ServerProviderCompatibilityAdvisory | undefined {
+  // The Chinese build carries the compatibility policy of its upstream version.
+  const compatibilityVersion = t3CodeVersion.replace(/[.-]zh(?:\.\d+)?$/, "");
   const policy = policies?.find(
-    (entry) => entry.driver === driver && satisfiesSemverRange(t3CodeVersion, entry.t3CodeRange),
+    (entry) =>
+      entry.driver === driver && satisfiesSemverRange(compatibilityVersion, entry.t3CodeRange),
   );
   if (!policy) return undefined;
   const unprefixed = version?.replace(/^v/, "");
