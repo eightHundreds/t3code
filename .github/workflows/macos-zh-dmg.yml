@@ -102,8 +102,8 @@ jobs:
           [[ ${#apps[@]} == 1 ]]
           app="${apps[0]}"
           executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")"
-          lipo -verify_arch arm64 "$app/Contents/MacOS/$executable"
-          lipo -verify_arch arm64 "$app/Contents/Resources/resource-monitor/t3-resource-monitor"
+          lipo "$app/Contents/MacOS/$executable" -verify_arch arm64
+          lipo "$app/Contents/Resources/resource-monitor/t3-resource-monitor" -verify_arch arm64
 
       - name: Upload to release
         shell: bash
