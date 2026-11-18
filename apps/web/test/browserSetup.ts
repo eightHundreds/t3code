@@ -2,6 +2,7 @@ import { beforeEach } from "vite-plus/test";
 import { commands } from "vite-plus/test/browser";
 
 import { __setClientSettingsForTests, getClientSettings } from "../src/hooks/useSettings";
+import { initializeI18n } from "../src/i18n/initializeI18n";
 
 declare module "vite-plus/test/browser" {
   interface BrowserCommands {
@@ -17,7 +18,10 @@ declare module "vite-plus/test/browser" {
 beforeEach(async () => {
   await commands.resetPointer();
   const current = getClientSettings();
-  if (current.uiLocale !== "en") {
-    __setClientSettingsForTests({ ...current, uiLocale: "en" });
+  if (current.language !== "en") {
+    __setClientSettingsForTests({ ...current, language: "en" });
   }
 });
+
+// The app initializes GT at startup; components using its hooks need the same here.
+initializeI18n(() => {});

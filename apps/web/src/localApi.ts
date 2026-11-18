@@ -1,5 +1,11 @@
-import type { ConfirmDialogOptions, ContextMenuItem, LocalApi } from "@t3tools/contracts";
+import type {
+  ConfirmDialogOptions,
+  ContextMenuItem,
+  ContextMenuSource,
+  LocalApi,
+} from "@t3tools/contracts";
 
+import { isWebUrl } from "./browser/webUrl";
 import { requestConfirmDialog } from "./confirmDialog";
 import { dismissContextMenu, showContextMenuFallback } from "./contextMenuFallback";
 import { readBrowserClientSettings, writeBrowserClientSettings } from "./clientPersistenceStorage";
@@ -38,6 +44,7 @@ export function createLocalApi(): LocalApi {
           return;
         }
 
+        if (!isWebUrl(url)) throw new Error("Unable to open link.");
         window.open(url, "_blank", "noopener,noreferrer");
       },
       openSystemSettings: async (pane) => {
@@ -54,12 +61,14 @@ export function createLocalApi(): LocalApi {
       show: async <T extends string>(
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
+        source?: ContextMenuSource,
       ): Promise<T | null> => {
         const localizedItems = localizeMenuItems(items);
         if (window.desktopBridge) {
           return window.desktopBridge.showContextMenu(
             localizedItems,
             position,
+            source,
           ) as Promise<T | null>;
         }
         return showContextMenuFallback(localizedItems, position);

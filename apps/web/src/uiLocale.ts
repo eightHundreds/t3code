@@ -1,4 +1,8 @@
 import { Children, useSyncExternalStore, type ReactNode } from "react";
+import { clientSettingsLanguage, type ClientSettings } from "@t3tools/contracts";
+import { resolveLocale } from "@t3tools/client-runtime/locales";
+
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./i18n/locales";
 
 import {
   resolveAppLocale,
@@ -15,6 +19,16 @@ export function setUiLocaleSetting(next: UiLocaleSetting): void {
   if (uiLocaleSetting === next) return;
   uiLocaleSetting = next;
   for (const listener of uiLocaleListeners) listener();
+}
+
+export function syncUiLocale(settings: ClientSettings): void {
+  const language = resolveLocale(
+    clientSettingsLanguage(settings),
+    systemLanguages(),
+    SUPPORTED_LOCALES,
+    DEFAULT_LOCALE,
+  );
+  setUiLocaleSetting(language === "zh" ? "zh-CN" : "en");
 }
 
 function subscribeUiLocale(onStoreChange: () => void): () => void {
