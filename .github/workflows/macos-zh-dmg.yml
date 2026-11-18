@@ -37,7 +37,7 @@ permissions:
 jobs:
   dmg:
     name: 构建未签名 DMG
-    runs-on: macos-15-intel
+    runs-on: macos-26-intel
     timeout-minutes: 120
     steps:
       # checkout 的 submodule 清理会踩到 .repos 里的悬空 gitlink。
