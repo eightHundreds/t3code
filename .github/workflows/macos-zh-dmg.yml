@@ -1,11 +1,11 @@
-name: macOS 中文版安装包
+name: macOS 中文版安装包（macOS 26）
 
 # 公开仓库的 GitHub macOS 托管 runner 上打未签名的 DMG，并挂到已有 Release。
 # 没有 Apple 签名证书，下载后需要在本机放行 Gatekeeper。
-# 合并进 main 之后从 main 打包，安装包和仓库保持同一份代码。
+# 本次备用构建固定到与原发布任务相同的提交。
 on:
   push:
-    branches: [main]
+    branches: [codex/release-v0.1.10-zh1-macos26]
     paths:
       - .github/workflows/macos-zh-dmg.yml
   workflow_dispatch:
@@ -37,14 +37,14 @@ permissions:
 jobs:
   dmg:
     name: 构建未签名 DMG
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 120
     steps:
       # checkout 的 submodule 清理会踩到 .repos 里的悬空 gitlink。
       - name: Checkout
         shell: bash
         env:
-          CHECKOUT_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.sha }}
+          CHECKOUT_REF: "57d126868e5fae2415ca7eef5244aae627d14a6b"
           GIT_TERMINAL_PROMPT: "0"
         run: |
           set -euo pipefail
