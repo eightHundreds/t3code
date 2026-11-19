@@ -2905,6 +2905,17 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
           role: "Viewer",
         },
       ],
+      ...(!signed
+        ? {
+            // Ad-hoc signing keeps unsigned release bundles eligible for Gatekeeper's user-override flow.
+            identity: "-",
+            hardenedRuntime: true,
+            gatekeeperAssess: false,
+            entitlements: "apps/desktop/resources/entitlements.mac.adhoc.plist",
+            entitlementsInherit: "apps/desktop/resources/entitlements.mac.adhoc.plist",
+            notarize: false,
+          }
+        : {}),
       ...(signed ? { sign: path.join(repoRoot, "scripts/sign-macos.ts") } : {}),
       ...(macPasskeySigning
         ? {
