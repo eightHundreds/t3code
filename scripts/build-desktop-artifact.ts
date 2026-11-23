@@ -2911,8 +2911,11 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
             identity: "-",
             hardenedRuntime: true,
             gatekeeperAssess: false,
-            entitlements: "apps/desktop/resources/entitlements.mac.adhoc.plist",
-            entitlementsInherit: "apps/desktop/resources/entitlements.mac.adhoc.plist",
+            entitlements: path.join(repoRoot, "apps/desktop/resources/entitlements.mac.adhoc.plist"),
+            entitlementsInherit: path.join(
+              repoRoot,
+              "apps/desktop/resources/entitlements.mac.adhoc.plist",
+            ),
             notarize: false,
           }
         : {}),
