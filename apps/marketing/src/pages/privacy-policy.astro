@@ -344,9 +344,10 @@ const sections = [
 
           <h3>Product Usage Data</h3>
           <p>
-            To stop sending product usage data, set the environment variable{" "}
-            <code>T3CODE_TELEMETRY_ENABLED=false</code>{" "}where T3 Code runs, for example in your
-            shell profile, and restart T3 Code.
+            T3 Code does not send product usage data by default. To opt in, set the environment
+            variable <code>T3CODE_TELEMETRY_ENABLED=true</code> where T3 Code runs, for example in
+            your shell profile, and restart T3 Code. To stop sending it, set the variable to{" "}
+            <code>false</code> or remove it, then restart T3 Code.
           </p>
 
           <h3>Cookies and Local Data</h3>
