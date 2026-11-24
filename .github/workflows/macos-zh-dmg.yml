@@ -66,6 +66,14 @@ jobs:
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
 
+      - name: Add Xcode tools to PATH
+        shell: bash
+        run: |
+          set -euo pipefail
+          lipo_path="$(xcrun --find lipo)"
+          echo "$(dirname "$lipo_path")" >> "$GITHUB_PATH"
+          "$lipo_path" -version
+
       - name: Build unsigned DMG
         shell: bash
         env:
