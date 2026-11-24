@@ -15,6 +15,13 @@ module.exports = async ({ appOutDir, electronPlatformName, arch, packager }) => 
     console.log("[server-compile-cache] Skipping untrusted bundle");
     return;
   }
+  // A universal app is packed twice, once per architecture. The cache embeds
+  // the build runtime identity, so including it for only the host architecture
+  // makes electron-builder reject the otherwise valid universal app.
+  if (process.env.T3CODE_DESKTOP_ARCH === "universal") {
+    console.log("[server-compile-cache] Skipping universal build cache");
+    return;
+  }
   const targetArch = ["ia32", "x64", "armv7l", "arm64", "universal"][arch];
   const runsWithRosetta =
     electronPlatformName === "darwin" &&
