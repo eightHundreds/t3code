@@ -72,7 +72,7 @@ jobs:
           set -euo pipefail
           lipo_path="$(xcrun --find lipo)"
           echo "$(dirname "$lipo_path")" >> "$GITHUB_PATH"
-          "$lipo_path" -version
+          "$lipo_path" -info /usr/bin/true
 
       - name: Build unsigned DMG
         shell: bash

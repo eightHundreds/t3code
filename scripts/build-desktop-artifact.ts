@@ -1987,7 +1987,7 @@ export const preflightMacDesktopBuild = Effect.fn("preflightMacDesktopBuild")(fu
       ),
       lipo:
         arch === "universal"
-          ? desktopBuildProbeSucceeds(ChildProcess.make("lipo", ["-version"]), "lipo")
+          ? desktopBuildProbeSucceeds(ChildProcess.make("xcrun", ["--find", "lipo"]), "lipo")
           : Effect.succeed(true),
     },
     { concurrency: "unbounded" },
@@ -2425,7 +2425,13 @@ export const stageResourceMonitor = Effect.fn("stageResourceMonitor")(function* 
     yield* fs.copyFile(builtBinaries[0]!, destinationPath);
   } else {
     yield* runCommand(
-      ChildProcess.make("lipo", ["-create", ...builtBinaries, "-output", destinationPath]),
+      ChildProcess.make("xcrun", [
+        "lipo",
+        "-create",
+        ...builtBinaries,
+        "-output",
+        destinationPath,
+      ]),
       {
         label: "lipo resource monitor universal binary",
         verbose: input.verbose,
