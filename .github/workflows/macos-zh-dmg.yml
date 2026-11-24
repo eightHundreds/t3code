@@ -70,9 +70,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          developer_dir="$(xcode-select -p)"
+          sdk_path="$(xcrun --sdk macosx --show-sdk-path)"
+          cc_path="$(xcrun --find clang)"
+          cxx_path="$(xcrun --find clang++)"
           lipo_path="$(xcrun --find lipo)"
+          echo "DEVELOPER_DIR=$developer_dir" >> "$GITHUB_ENV"
+          echo "SDKROOT=$sdk_path" >> "$GITHUB_ENV"
+          echo "CC=$cc_path" >> "$GITHUB_ENV"
+          echo "CXX=$cxx_path" >> "$GITHUB_ENV"
           echo "$(dirname "$lipo_path")" >> "$GITHUB_PATH"
           "$lipo_path" -info /usr/bin/true
+          printf '#include <functional>\n' | "$cxx_path" -x c++ -std=c++17 -fsyntax-only -
 
       - name: Build unsigned DMG
         shell: bash
