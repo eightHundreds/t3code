@@ -2870,7 +2870,12 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     const repoRoot = yield* RepoRoot;
     buildConfig.mac = {
       target: target === "dmg" ? [target, "zip"] : [target],
-      ...(arch === "universal" ? { x64ArchFiles: "**/*.darwin-*.node" } : {}),
+      ...(arch === "universal"
+        ? {
+            // Universal packaging stages both arch-specific sidecar dependencies in each app.
+            x64ArchFiles: "{**/*.darwin-*.node,**/*darwin-*/**/*}",
+          }
+        : {}),
       icon: "icon.icns",
       category: "public.app-category.developer-tools",
       extendInfo: {
