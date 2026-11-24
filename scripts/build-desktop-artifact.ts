@@ -2870,6 +2870,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     const repoRoot = yield* RepoRoot;
     buildConfig.mac = {
       target: target === "dmg" ? [target, "zip"] : [target],
+      ...(arch === "universal" ? { x64ArchFiles: "**/*.darwin-*.node" } : {}),
       icon: "icon.icns",
       category: "public.app-category.developer-tools",
       extendInfo: {
