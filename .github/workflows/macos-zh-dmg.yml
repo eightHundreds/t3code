@@ -80,8 +80,12 @@ jobs:
           echo "CC=$cc_path" >> "$GITHUB_ENV"
           echo "CXX=$cxx_path" >> "$GITHUB_ENV"
           echo "$(dirname "$lipo_path")" >> "$GITHUB_PATH"
+          echo "Using Xcode: $developer_dir"
+          echo "Using macOS SDK: $sdk_path"
+          echo "Using C++ compiler: $cxx_path"
           "$lipo_path" -info /usr/bin/true
-          printf '#include <functional>\n' | "$cxx_path" -x c++ -std=c++17 -fsyntax-only -
+          printf '#include <functional>\n' | DEVELOPER_DIR="$developer_dir" SDKROOT="$sdk_path" \
+            "$cxx_path" -x c++ -std=c++17 -fsyntax-only -
 
       - name: Build unsigned DMG
         shell: bash
